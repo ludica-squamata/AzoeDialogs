@@ -1,6 +1,6 @@
 from pygame import init as py_init
-from frontend.widgethandler import WidgetHandler
-from frontend.renderer import Renderer
+from frontend.globals.widgethandler import WidgetHandler
+from frontend.globals.renderer import Renderer
 from backend.eventhandler import EventHandler
 
 py_init()

@@ -1,8 +1,8 @@
 from pygame import Surface, transform, SRCALPHA, BLEND_MAX, BLEND_MIN, K_DELETE
 from .basewidget import BaseWidget
-from .widgethandler import WidgetHandler
-from .renderer import Renderer
-from .constants import COLOR_UNSELECTED, COLOR_SELECTED
+from frontend.globals.widgethandler import WidgetHandler
+from frontend.globals.renderer import Renderer
+from frontend.globals.constants import COLOR_UNSELECTED, COLOR_SELECTED
 from pygame.sprite import Group
 from .connection import Connection
 

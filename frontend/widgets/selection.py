@@ -1,8 +1,8 @@
 from pygame import Rect
 from .basewidget import BaseWidget
-from .constants import COLOR_SELECTION
-from .widgethandler import WidgetHandler
-from .renderer import Renderer
+from frontend.globals.constants import COLOR_SELECTION
+from frontend.globals.widgethandler import WidgetHandler
+from frontend.globals.renderer import Renderer
 from backend.eventhandler import EventHandler
 
 

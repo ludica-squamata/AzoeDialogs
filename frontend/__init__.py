@@ -1,6 +1,6 @@
-from .node import Square, Diamond
+from frontend.widgets.node import Square, Diamond
 from backend.eventhandler import EventHandler
-from .selection import Selection
+from frontend.widgets.selection import Selection
 
 
 def widget_creator(event):
