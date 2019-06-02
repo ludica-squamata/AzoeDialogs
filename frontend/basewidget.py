@@ -1,5 +1,4 @@
 from pygame.sprite import Sprite
-from frontend.constants import COLOR_SELECTED, COLOR_UNSELECTED
 
 
 class BaseWidget(Sprite):
@@ -14,10 +13,10 @@ class BaseWidget(Sprite):
 
     # event catcher functions
     def on_keydown(self, event):
-        print(self, event)
+        pass
 
     def on_keyup(self, event):
-        print(self, event)
+        pass
 
     def on_mousedown(self, event):
         if event.button == 1:
@@ -33,17 +32,14 @@ class BaseWidget(Sprite):
         pass
 
     def on_mousemotion(self, event):
-        if event.buttons[0]:
-            self.rect.center = event.pos
+        self.rect.move_ip(event.rel)
 
     # state functions
     def select(self):
         self.is_selected = True
-        self.image.fill(COLOR_SELECTED)
 
     def deselect(self):
         self.is_selected = False
-        self.image.fill(COLOR_UNSELECTED)
 
     def scale(self, delta):
         x, y = self.rect.center

@@ -1,8 +1,9 @@
-from pygame import Surface, transform, SRCALPHA, BLEND_MAX, BLEND_MIN
+from pygame import Surface, transform, SRCALPHA, BLEND_MAX, BLEND_MIN, K_DELETE
 from .basewidget import BaseWidget
 from .widgethandler import WidgetHandler
 from .renderer import Renderer
 from .constants import COLOR_UNSELECTED, COLOR_SELECTED
+from pygame.sprite import Group
 
 
 class Node(BaseWidget):
@@ -13,6 +14,18 @@ class Node(BaseWidget):
         self.rect = self.image.get_rect(center=(x, y))
         WidgetHandler.add_widgets(self)
         Renderer.add_widgets(self)
+
+    def on_keydown(self, event):
+        if event.key == K_DELETE:
+            WidgetHandler.del_widget(self)
+            Renderer.del_widget(self)
+
+    def update(self, *args):
+        if self.is_selected:
+            self.deselect()
+        for g in self.groups():
+            if isinstance(g, Group):  # a very clunky way of saying "it's selected"
+                self.select()
 
 
 class Square(Node):
@@ -26,6 +39,14 @@ class Square(Node):
         self.image = transform.scale(self.image, (self.size, self.size))
         super().scale(delta)
 
+    def select(self):
+        super().select()
+        self.image.fill(COLOR_SELECTED)
+
+    def deselect(self):
+        super().deselect()
+        self.image.fill(COLOR_UNSELECTED)
+
 
 class Diamond(Node):
 
@@ -38,11 +59,11 @@ class Diamond(Node):
 
     def select(self):
         self.image.fill(COLOR_SELECTED, special_flags=BLEND_MAX)
-        self.is_selected = True
+        super().select()
 
     def deselect(self):
         self.image.fill(COLOR_UNSELECTED, special_flags=BLEND_MIN)
-        self.is_selected = False
+        super().deselect()
 
     def scale(self, delta):
         self.size += delta
