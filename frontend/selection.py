@@ -7,6 +7,9 @@ from backend.eventhandler import EventHandler
 
 
 class Selection(BaseWidget):
+    layer = 0
+    selectable = False
+
     def __init__(self, event):
         x, y = event.data['pos']
         self.rect = Rect(x, y, 1, 1)

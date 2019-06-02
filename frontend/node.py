@@ -4,21 +4,34 @@ from .widgethandler import WidgetHandler
 from .renderer import Renderer
 from .constants import COLOR_UNSELECTED, COLOR_SELECTED
 from pygame.sprite import Group
+from .connection import Connection
 
 
 class Node(BaseWidget):
+    _layer = 1
+
     def __init__(self, parent, imagen, x, y):
         super().__init__(parent)
+        self.connections = []
         self.tipo = ''
         self.image = imagen
         self.rect = self.image.get_rect(center=(x, y))
-        WidgetHandler.add_widgets(self)
-        Renderer.add_widgets(self)
+        WidgetHandler.add_widget(self)
+        Renderer.add_widget(self)
+
+    def connect(self, other):
+        Connection(self, other)
+        self.connections.append(other)
+        other.set_connected(self)
+        # print(self.connections)
+
+    def set_connected(self, other):
+        self.connections.append(other)
+        # print(self.connections)
 
     def on_keydown(self, event):
         if event.key == K_DELETE:
-            WidgetHandler.del_widget(self)
-            Renderer.del_widget(self)
+            self.kill()
 
     def update(self, *args):
         if self.is_selected:
@@ -31,6 +44,7 @@ class Node(BaseWidget):
 class Square(Node):
     def __init__(self, size, x, y):
         self.size = size
+        self.layer = 1
         imagen = Surface((size, size))
         super().__init__('Example', imagen, x, y)
 
@@ -52,6 +66,7 @@ class Diamond(Node):
 
     def __init__(self, size, x, y):
         self.size = size
+        self.layer = 1
         img = Surface((size, size), SRCALPHA)
         img.fill((0, 0, 0, 255))
         imagen = transform.rotate(img, 45)
