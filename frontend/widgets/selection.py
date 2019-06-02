@@ -1,9 +1,7 @@
-from pygame import Rect
-from .basewidget import BaseWidget
-from frontend.globals.constants import COLOR_SELECTION
-from frontend.globals.widgethandler import WidgetHandler
-from frontend.globals.renderer import Renderer
+from frontend.globals import COLOR_SELECTION, WidgetHandler, Renderer
 from backend.eventhandler import EventHandler
+from .basewidget import BaseWidget
+from pygame import Rect
 
 
 class Selection(BaseWidget):
@@ -20,8 +18,8 @@ class Selection(BaseWidget):
 
     def on_mousemotion(self, event):
         if event.buttons[0]:
-            self.rect.width = event.pos[0]-self.rect.x
-            self.rect.height = event.pos[1]-self.rect.y
+            self.rect.width = event.pos[0] - self.rect.x
+            self.rect.height = event.pos[1] - self.rect.y
 
     def on_mouseup(self, event):
         EventHandler.trigger('Selection', 'SelectionObject', {'value': False})

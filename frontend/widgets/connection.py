@@ -1,8 +1,6 @@
-from .basewidget import BaseWidget
+from frontend.globals import COLOR_CONNECTION, WidgetHandler, Renderer
 from pygame import Surface, SRCALPHA, draw
-from frontend.globals.widgethandler import WidgetHandler
-from frontend.globals.renderer import Renderer
-from frontend.globals.constants import COLOR_CONNECTION
+from .basewidget import BaseWidget
 
 
 class Connection(BaseWidget):

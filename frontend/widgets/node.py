@@ -1,10 +1,8 @@
+from frontend.globals import WidgetHandler, Renderer, COLOR_UNSELECTED, COLOR_SELECTED
 from pygame import Surface, transform, SRCALPHA, BLEND_MAX, BLEND_MIN, K_DELETE
-from .basewidget import BaseWidget
-from frontend.globals.widgethandler import WidgetHandler
-from frontend.globals.renderer import Renderer
-from frontend.globals.constants import COLOR_UNSELECTED, COLOR_SELECTED
-from pygame.sprite import Group
 from .connection import Connection
+from .basewidget import BaseWidget
+from pygame.sprite import Group
 
 
 class Node(BaseWidget):
