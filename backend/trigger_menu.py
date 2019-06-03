@@ -10,9 +10,9 @@ class TriggerMenu:
     @classmethod
     def trigger(cls, key):
         x, y = mouse.get_pos()
-        if key == K_s:
-            EventHandler.trigger('AddSquare', cls.name, {'size': 16, 'pos': [x, y]})
-        elif key == K_d:
-            EventHandler.trigger('AddDiamond', cls.name, {'size': 16, 'pos': [x, y]})
+        if key == K_s and System.MODE == 'Selection':
+            EventHandler.trigger('AddSquare', cls.name, {'pos': [x, y]})
+        elif key == K_d and System.MODE == 'Selection':
+            EventHandler.trigger('AddDiamond', cls.name, {'pos': [x, y]})
         elif key == K_c:
             System.toggle_mode()

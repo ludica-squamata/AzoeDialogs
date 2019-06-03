@@ -1,4 +1,4 @@
-# AzoeDialogs v0.3.0a
+# AzoeDialogs v 0.3.2
 Un editor/creador de árboles de diálogo para el proyecto AzoeEngine.
 
 
@@ -16,7 +16,6 @@ _Modo selección_
 - click izquierdo (sobre el canvas): deselecciona todos los objetos.
 - click izquierdo (sobre el canvas) y arrastrar: mantener para crear una caja de selección.
 - click izquierdo (sobre un objeto) y arrastrar: mueve un objeto seleccionado.
-- rueda: hace crecer (hacia abajo) o reducir (hacia arriba) todos los objetos seleccionados.
 
 _Modo Conexión_
 - click izquierdo: sobre un objeto, estable una conexión entre el objeto seleccionado y el señalado. 

@@ -20,14 +20,7 @@ class BaseWidget(Sprite):
         pass
 
     def on_mousedown(self, event):
-        if event.button == 1:
-            self.select()
-
-        elif event.button == 4:  # arriba
-            self.scale(-1)
-
-        elif event.button == 5:  # abajo
-            self.scale(1)
+        pass
 
     def on_mouseup(self, event):
         pass
@@ -41,7 +34,3 @@ class BaseWidget(Sprite):
 
     def deselect(self):
         self.is_selected = False
-
-    def scale(self, delta):
-        x, y = self.rect.center
-        self.rect = self.image.get_rect(center=(x, y))

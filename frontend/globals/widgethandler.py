@@ -55,7 +55,7 @@ class WidgetHandler:
                         widget.on_keyup(e)
 
             elif e.type == MOUSEBUTTONDOWN:  # pos, button
-                widgets = cls.widgets.get_sprites_at(e.pos)
+                widgets = [w for w in cls.widgets.get_sprites_at(e.pos) if w.selectable]
                 if System.MODE == 'Selection':
                     if not len(widgets) and e.button == 1:
                         cls.selected.empty()
@@ -66,11 +66,11 @@ class WidgetHandler:
 
                     elif not cls.selected.has(widgets) and e.button == 1:
                         cls.selected.empty()
-                        cls.selected.add([w for w in widgets if w.selectable])
+                        cls.selected.add(widgets)
 
                 elif System.MODE == 'Connection':
                     if not cls.selected.has(widgets) and e.button == 1 and len(widgets):
-                        for base in cls.selected:
+                        for base in [w for w in cls.selected if w.selectable]:
                             base.connect(widgets[-1])
 
                 if len(widgets):  # this is only valid for the mouse wheel
