@@ -1,4 +1,5 @@
-from pygame import event, KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP, MOUSEMOTION, QUIT, K_ESCAPE, K_c, K_a
+from pygame import event, KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP, MOUSEMOTION, QUIT, K_ESCAPE, K_c, K_a, key
+from pygame import KMOD_LCTRL, KMOD_CTRL, K_RSHIFT, K_LSHIFT
 from pygame.sprite import LayeredUpdates, Group
 from backend import salir, EventHandler, TriggerMenu
 
@@ -40,6 +41,9 @@ class WidgetHandler:
         event.clear()
 
         for e in events:
+            mods = key.get_mods()
+            ctrl = mods & KMOD_CTRL or mods & KMOD_LCTRL
+            shift = mods & K_LSHIFT or mods & K_RSHIFT
             if e.type == QUIT or (e.type == KEYDOWN and e.key == K_ESCAPE):
                 salir()
 
@@ -64,16 +68,17 @@ class WidgetHandler:
 
             elif e.type == MOUSEBUTTONDOWN:  # pos, button
                 widgets = [w for w in cls.widgets.get_sprites_at(e.pos) if w.selectable]
-
                 if not len(widgets) and e.button == 1:
-                    cls.selected.empty()
+                    if not shift:
+                        cls.selected.empty()
                     EventHandler.trigger('Selection', cls.name, {"pos": e.pos, 'value': True})
 
                 elif len(widgets) and not len(cls.selected):
                     cls.selected.add([w for w in widgets if w.selectable])
 
                 elif not cls.selected.has(widgets) and e.button == 1:
-                    cls.selected.empty()
+                    if not ctrl:
+                        cls.selected.empty()
                     cls.selected.add(widgets)
 
                 elif len(widgets):  # this is only valid for the mouse wheel
@@ -89,7 +94,7 @@ class WidgetHandler:
                             cls.selected.add(widget)
 
             elif e.type == MOUSEMOTION:  # pos, rel, buttons
-                if e.buttons[0] and len(cls.selected):
+                if e.buttons[0] and len(cls.selected) and not shift:
                     for widget in cls.selected:
                         widget.on_mousemotion(e)
 
