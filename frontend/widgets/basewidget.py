@@ -7,6 +7,7 @@ class BaseWidget(Sprite):
     is_selected = False
     on_focus = False
     selectable = True
+    numerable = True
 
     def __init__(self, parent=None):
         self.parent = parent

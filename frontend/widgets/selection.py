@@ -6,7 +6,7 @@ from pygame import Rect
 
 class Selection(BaseWidget):
     layer = 0
-    selectable = False
+    numerable = False
 
     def __init__(self, event):
         x, y = event.data['pos']

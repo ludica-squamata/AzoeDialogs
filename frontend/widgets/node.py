@@ -32,7 +32,7 @@ class Node(BaseWidget):
             self.kill()
 
     def get_idx(self):
-        return [w for w in WidgetHandler.widgets.sprites() if w.selectable].index(self)
+        return [w for w in WidgetHandler.widgets.sprites() if w.numerable].index(self)
 
     def create(self):
         pass
