@@ -1,6 +1,6 @@
-from pygame import event, KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP, MOUSEMOTION, QUIT, K_ESCAPE
+from pygame import event, KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP, MOUSEMOTION, QUIT, K_ESCAPE, K_c, K_a
 from pygame.sprite import LayeredUpdates, Group
-from backend import salir, EventHandler, TriggerMenu, System
+from backend import salir, EventHandler, TriggerMenu
 
 
 class WidgetHandler:
@@ -44,10 +44,18 @@ class WidgetHandler:
                 salir()
 
             elif e.type == KEYDOWN:
-                if len(cls.selected):
-                    for widget in cls.selected:
-                        widget.on_keydown(e)
-                TriggerMenu.trigger(e.key)
+                widgets = cls.selected.sprites()
+                if e.key == K_c:
+                    if len(widgets) == 2 and all([o.numerable for o in widgets]):
+                        widgets[0].connect(widgets[1])
+                elif e.key == K_a and len(widgets) == 2:
+                    base, other = widgets
+                    EventHandler.trigger('AddMidPoint', 'System', {'base': base, 'other': other})
+
+                elif not TriggerMenu.trigger(e.key):
+                    if len(cls.selected):
+                        for widget in cls.selected:
+                            widget.on_keydown(e)
 
             elif e.type == KEYUP:
                 if len(cls.selected):
@@ -56,44 +64,37 @@ class WidgetHandler:
 
             elif e.type == MOUSEBUTTONDOWN:  # pos, button
                 widgets = [w for w in cls.widgets.get_sprites_at(e.pos) if w.selectable]
-                if System.MODE == 'Selection':
-                    if not len(widgets) and e.button == 1:
-                        cls.selected.empty()
-                        EventHandler.trigger('Selection', cls.name, {"pos": e.pos, 'value': True})
 
-                    elif len(widgets) and not len(cls.selected):
-                        cls.selected.add([w for w in widgets if w.selectable])
+                if not len(widgets) and e.button == 1:
+                    cls.selected.empty()
+                    EventHandler.trigger('Selection', cls.name, {"pos": e.pos, 'value': True})
 
-                    elif not cls.selected.has(widgets) and e.button == 1:
-                        cls.selected.empty()
-                        cls.selected.add(widgets)
+                elif len(widgets) and not len(cls.selected):
+                    cls.selected.add([w for w in widgets if w.selectable])
 
-                elif System.MODE == 'Connection':
-                    if not cls.selected.has(widgets) and e.button == 1 and len(widgets):
-                        for base in [w for w in cls.selected if w.selectable]:
-                            base.connect(widgets[-1])
+                elif not cls.selected.has(widgets) and e.button == 1:
+                    cls.selected.empty()
+                    cls.selected.add(widgets)
 
-                if len(widgets):  # this is only valid for the mouse wheel
+                elif len(widgets):  # this is only valid for the mouse wheel
                     for widget in cls.selected:
                         if widget is not cls.selection:
                             widget.on_mousedown(e)
 
             elif e.type == MOUSEBUTTONUP:  # pos, button
-                if System.MODE == 'Selection':
-                    if cls.on_selection and e.button == 1:
-                        cls.selection.on_mouseup(e)
-                        for widget in cls.widgets:
-                            if cls.selection.rect.contains(widget.rect):
-                                cls.selected.add(widget)
+                if cls.on_selection and e.button == 1:
+                    cls.selection.on_mouseup(e)
+                    for widget in cls.widgets:
+                        if cls.selection.rect.contains(widget.rect):
+                            cls.selected.add(widget)
 
             elif e.type == MOUSEMOTION:  # pos, rel, buttons
-                if System.MODE == 'Selection':
-                    if e.buttons[0] and len(cls.selected):
-                        for widget in cls.selected:
-                            widget.on_mousemotion(e)
+                if e.buttons[0] and len(cls.selected):
+                    for widget in cls.selected:
+                        widget.on_mousemotion(e)
 
-                    elif cls.on_selection and e.buttons[0]:
-                        cls.selection.on_mousemotion(e)
+                elif cls.on_selection and e.buttons[0]:
+                    cls.selection.on_mousemotion(e)
 
         cls.widgets.update()
 

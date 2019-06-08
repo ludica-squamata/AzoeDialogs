@@ -10,7 +10,7 @@ class Node(BaseWidget):
     tipo = ''
     idx = 0
 
-    def __init__(self, parent, ):
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.connections = []
         self.fuente = font.SysFont('Verdana', 10)
@@ -21,11 +21,9 @@ class Node(BaseWidget):
         Connection(self, other)
         self.connections.append(other)
         other.set_connected(self)
-        # print(self.connections)
 
     def set_connected(self, other):
         self.connections.append(other)
-        # print(self.connections)
 
     def on_keydown(self, event):
         if event.key == K_DELETE:
@@ -59,7 +57,7 @@ class Node(BaseWidget):
 class Square(Node):
     def __init__(self, x, y):
 
-        super().__init__('Example')
+        super().__init__()
 
         self.layer = 1
         self.tipo = 'Square'
@@ -87,7 +85,7 @@ class Square(Node):
 class Diamond(Node):
 
     def __init__(self, x, y, ):
-        super().__init__(None)
+        super().__init__()
         len_idx = len(str(self.get_idx()))
         if len_idx == 1:
             self.size = 16
