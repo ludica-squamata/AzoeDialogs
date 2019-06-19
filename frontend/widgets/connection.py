@@ -3,7 +3,6 @@ from backend.eventhandler import EventHandler
 from pygame import Surface, SRCALPHA, draw, BLEND_MAX, BLEND_MIN
 from pygame.sprite import Group
 from .basewidget import BaseWidget
-from bisect import bisect
 
 
 class Connection(BaseWidget):
@@ -37,12 +36,11 @@ class Connection(BaseWidget):
         if all(handle in self.handles for handle in [base, other]):
             base = self.points.index(event.data['base'].rect.center)
             other = self.points.index(event.data['other'].rect.center)
-            if other == base+1:
-                self.add_handle(base, other)
+            self.add_handle(base, other)
 
     def add_handle(self, a, b):
         pc = self.create_midpoint(self.points[a], self.points[b])
-        p = bisect(self.points, pc)
+        p = a+1 if a < b else b+1
 
         self.points.insert(p, pc)
         self.handles.insert(p, MidPointHandle(self, pc, self.points.index(pc)))
@@ -62,6 +60,9 @@ class Connection(BaseWidget):
         else:
             self.kill()
 
+    def __repr__(self):
+        return 'Connection between '+' '.join(['{}']*len(self.handles)).format(*self.handles)
+
 
 class MidPointHandle(BaseWidget):
     numerable = False
@@ -76,8 +77,8 @@ class MidPointHandle(BaseWidget):
         WidgetHandler.add_widget(self)
 
     def on_keydown(self, event):
-        del self.parent.points[self.idx]
-        super().on_keydown(event)
+        if super().on_keydown(event):
+            del self.parent.points[self.idx]
 
     def select(self):
         self.image.fill(COLOR_SELECTED, special_flags=BLEND_MAX)
@@ -99,3 +100,6 @@ class MidPointHandle(BaseWidget):
         for g in self.groups():
             if isinstance(g, Group):  # a very clunky way of saying "it's selected"
                 self.select()
+
+    def __repr__(self):
+        return 'MidPoint #'+str(self.idx)

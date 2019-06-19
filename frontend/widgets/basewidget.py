@@ -18,6 +18,8 @@ class BaseWidget(Sprite):
     def on_keydown(self, event):
         if event.key == K_DELETE:
             self.kill()
+            return True
+        return False
 
     def on_keyup(self, event):
         pass

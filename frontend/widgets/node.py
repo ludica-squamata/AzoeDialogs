@@ -18,9 +18,10 @@ class Node(BaseWidget):
         Renderer.add_widget(self)
 
     def connect(self, other):
-        Connection(self, other)
-        self.connections.append(other)
-        other.set_connected(self)
+        if other not in self.connections:
+            Connection(self, other)
+            self.connections.append(other)
+            other.set_connected(self)
 
     def set_connected(self, other):
         self.connections.append(other)
