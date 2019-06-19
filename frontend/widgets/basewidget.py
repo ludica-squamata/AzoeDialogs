@@ -1,4 +1,5 @@
 from pygame.sprite import Sprite
+from pygame import K_DELETE
 
 
 class BaseWidget(Sprite):
@@ -15,7 +16,8 @@ class BaseWidget(Sprite):
 
     # event catcher functions
     def on_keydown(self, event):
-        pass
+        if event.key == K_DELETE:
+            self.kill()
 
     def on_keyup(self, event):
         pass

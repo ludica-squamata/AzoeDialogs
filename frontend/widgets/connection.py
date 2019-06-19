@@ -75,6 +75,10 @@ class MidPointHandle(BaseWidget):
         Renderer.add_widget(self)
         WidgetHandler.add_widget(self)
 
+    def on_keydown(self, event):
+        del self.parent.points[self.idx]
+        super().on_keydown(event)
+
     def select(self):
         self.image.fill(COLOR_SELECTED, special_flags=BLEND_MAX)
         super().select()

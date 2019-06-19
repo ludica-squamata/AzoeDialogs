@@ -1,5 +1,5 @@
 from frontend.globals import WidgetHandler, Renderer, COLOR_UNSELECTED, COLOR_SELECTED
-from pygame import Surface, transform, SRCALPHA, BLEND_MAX, BLEND_MIN, K_DELETE, font
+from pygame import Surface, transform, SRCALPHA, BLEND_MAX, BLEND_MIN, font
 from .connection import Connection
 from .basewidget import BaseWidget
 from pygame.sprite import Group
@@ -24,10 +24,6 @@ class Node(BaseWidget):
 
     def set_connected(self, other):
         self.connections.append(other)
-
-    def on_keydown(self, event):
-        if event.key == K_DELETE:
-            self.kill()
 
     def get_idx(self):
         return [w for w in WidgetHandler.widgets.sprites() if w.numerable].index(self)
