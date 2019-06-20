@@ -1,6 +1,6 @@
 from frontend.globals import WidgetHandler, Renderer, COLOR_UNSELECTED, COLOR_SELECTED
 from pygame import Surface, transform, SRCALPHA, BLEND_MAX, BLEND_MIN, font
-from .connection import Connection
+from .connection import toggle_connection
 from .basewidget import BaseWidget
 from pygame.sprite import Group
 
@@ -19,12 +19,21 @@ class Node(BaseWidget):
 
     def connect(self, other):
         if other not in self.connections:
-            Connection(self, other)
+            toggle_connection(self, other)
             self.connections.append(other)
             other.set_connected(self)
 
+    def disconnect(self, other):
+        if other in self.connections:
+            toggle_connection(self, other, value=False)
+            self.connections.remove(other)
+            other.del_connected(self)
+
     def set_connected(self, other):
         self.connections.append(other)
+
+    def del_connected(self, other):
+        self.connections.remove(other)
 
     def get_idx(self):
         return [w for w in WidgetHandler.widgets.sprites() if w.numerable].index(self)

@@ -25,6 +25,8 @@ class Connection(BaseWidget):
 
         # noinspection PyTypeChecker
         EventHandler.register(self.event_handle, 'AddMidPoint')
+        # noinspection PyTypeChecker
+        EventHandler.register(self.delete, 'Connection')
 
     @staticmethod
     def create_midpoint(ra, rb):
@@ -51,6 +53,11 @@ class Connection(BaseWidget):
         image = Surface((640, 480), SRCALPHA)
         draw.aalines(image, COLOR_CONNECTION, 0, self.points, 1)
         return image
+
+    def delete(self, event):
+        a, b = event.data['parents']
+        if not event.data['value'] and all([x in self.handles for x in [a, b]]):
+            self.kill()
 
     def update(self):
         self.points[0] = self.parent_a.rect.center
@@ -103,3 +110,10 @@ class MidPointHandle(BaseWidget):
 
     def __repr__(self):
         return 'MidPoint #'+str(self.idx)
+
+
+def toggle_connection(a, b, value=True):
+    if value:
+        Connection(a, b)
+    else:
+        EventHandler.trigger('Connection', None, {'value': value, 'parents': [a, b]})
