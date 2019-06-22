@@ -1,7 +1,7 @@
 from pygame import event, KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP, MOUSEMOTION, QUIT, K_ESCAPE, K_c, K_a, key
-from pygame import KMOD_LCTRL, KMOD_CTRL, K_RSHIFT, K_LSHIFT
+from pygame import KMOD_LCTRL, KMOD_CTRL, K_RSHIFT, K_LSHIFT, K_F1
 from pygame.sprite import LayeredUpdates, Group
-from backend import salir, EventHandler, TriggerMenu
+from backend import salir, EventHandler, TriggerMenu, System
 
 
 class WidgetHandler:
@@ -11,14 +11,23 @@ class WidgetHandler:
     selection = None
     on_selection = False
     selected = Group()
+    numerable = []
 
     @classmethod
     def add_widget(cls, widget):
         cls.widgets.add(widget)
+        if widget.numerable:
+            cls.numerable.append(widget)
+            System.number_of_nodes += 1
 
     @classmethod
     def del_widget(cls, widget):
         cls.widgets.remove(widget)
+        if widget.numerable:
+            cls.numerable.remove(widget)
+            System.number_of_nodes -= 1
+
+        cls.numerable.sort(key=lambda o: o.idx)
 
     @classmethod
     def set_active(cls, widget):
@@ -51,6 +60,7 @@ class WidgetHandler:
                 widgets = cls.selected.sprites()
                 if e.key == K_c:
                     if len(widgets) == 2 and all([o.numerable for o in widgets]):
+                        widgets.sort(key=lambda o: o.idx)  # lower idx's go first
                         if not shift:
                             widgets[0].connect(widgets[1])
                         else:
@@ -58,6 +68,14 @@ class WidgetHandler:
                 elif e.key == K_a and len(widgets) == 2:
                     base, other = widgets
                     EventHandler.trigger('AddMidPoint', 'System', {'base': base, 'other': other})
+
+                elif e.key == K_F1:
+                    d = {}
+                    for widget in cls.numerable:
+                        d[str(widget)] = {'type': widget.tipo}
+                        if widget.tipo != 'leaf':
+                            d[str(widget)]['leads'] = widget.lead
+                    print(d)
 
                 elif not TriggerMenu.trigger(e.key):
                     if len(cls.selected):

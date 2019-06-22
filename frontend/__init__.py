@@ -1,4 +1,4 @@
-from frontend.widgets.node import Square, Diamond
+from frontend.widgets.node import Square, Diamond, Circle
 from backend.eventhandler import EventHandler
 from frontend.widgets.selection import Selection
 from frontend.globals.widgethandler import WidgetHandler
@@ -10,10 +10,12 @@ def widget_creator(event):
         Diamond(*pos)
     elif event.tipo == 'AddSquare':
         Square(*pos)
+    elif event.tipo == 'AddCircle':
+        Circle(*pos)
     elif event.tipo == 'Selection':
         if 'pos' in event.data:
             Selection(event)
 
 
 # noinspection PyTypeChecker
-EventHandler.register(widget_creator, 'AddDiamond', 'AddSquare', "Selection")
+EventHandler.register(widget_creator, 'AddDiamond', 'AddSquare', 'AddCircle', 'Selection')

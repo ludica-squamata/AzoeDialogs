@@ -1,5 +1,6 @@
 from .eventhandler import EventHandler
-from pygame import K_s, K_d
+from .system import System
+from pygame import K_s, K_d, K_f
 from pygame import mouse
 
 
@@ -10,11 +11,14 @@ class TriggerMenu:
     def trigger(cls, key):
         value = False
         x, y = mouse.get_pos()
-        if key == K_s:
+        if key == K_s and System.get_lenght() > 0:
             EventHandler.trigger('AddSquare', cls.name, {'pos': [x, y]})
             value = True
-        elif key == K_d:
+        elif key == K_d and System.get_lenght() > 0:
             EventHandler.trigger('AddDiamond', cls.name, {'pos': [x, y]})
+            value = True
+        elif key == K_f and System.get_lenght() > 0:
+            EventHandler.trigger('AddCircle', cls.name, {'pos': [x, y]})
             value = True
 
         return value

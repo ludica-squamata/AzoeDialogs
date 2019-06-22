@@ -1,3 +1,11 @@
+from .util import abrir_json
+
 
 class System:
-    pass
+    data = abrir_json('data/input.json')
+    lenght = len(data)
+    number_of_nodes = 0
+
+    @classmethod
+    def get_lenght(cls):
+        return cls.lenght-cls.number_of_nodes
