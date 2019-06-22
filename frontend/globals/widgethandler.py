@@ -75,6 +75,7 @@ class WidgetHandler:
                         d[str(widget)] = {'type': widget.tipo}
                         if widget.tipo != 'leaf':
                             d[str(widget)]['leads'] = widget.lead
+                        d[str(widget)]['txt'] = System.data[int(widget)]
                     print(d)
 
                 elif not TriggerMenu.trigger(e.key):

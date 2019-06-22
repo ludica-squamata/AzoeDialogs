@@ -1,7 +1,7 @@
-from pygame import display, draw, font
+from pygame import display, draw
 from pygame.sprite import LayeredUpdates
-from .constants import COLOR_BG, COLOR_TEXT
-from backend import EventHandler, System
+from .constants import COLOR_BG
+from backend import EventHandler
 
 
 class Renderer:
@@ -9,12 +9,14 @@ class Renderer:
     on_selection = False
     selection = None
     f = None
+    width, height = 0, 0
 
     @classmethod
     def init(cls, w, h):
         display.set_mode((w, h))
+        cls.width = w
+        cls.height = h
         cls.widgets = LayeredUpdates()
-        cls.f = font.SysFont('Verdana', 16)
 
     @classmethod
     def enable_selection(cls, selection_object):
@@ -33,8 +35,6 @@ class Renderer:
     def update(cls):
         fondo = display.get_surface()
         rect = [fondo.fill(COLOR_BG)]
-        t = 'Nodos Disponibles: ' + str(System.get_lenght())
-        fondo.blit(cls.f.render(t, 1, COLOR_TEXT, COLOR_BG), (0, 0))
         if cls.on_selection:
             draw.rect(fondo, cls.selection.color, cls.selection.rect, 1)
         rect.extend(cls.widgets.draw(fondo))

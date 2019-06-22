@@ -6,6 +6,8 @@ from backend.eventhandler import EventHandler
 py_init()
 Renderer.init(640, 480)
 
+EventHandler.trigger('Init', 'System', {})
+
 while True:
     EventHandler.process()
     WidgetHandler.update()
