@@ -1,7 +1,8 @@
 from pygame import event, KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP, MOUSEMOTION, QUIT, K_ESCAPE, K_c, K_a, key
-from pygame import KMOD_LCTRL, KMOD_CTRL, K_RSHIFT, K_LSHIFT, K_F1
+from pygame import KMOD_LCTRL, KMOD_CTRL, K_RSHIFT, K_LSHIFT, K_RETURN
 from pygame.sprite import LayeredUpdates, Group
 from backend import salir, EventHandler, TriggerMenu, System
+from backend.util import guardar_json
 
 
 class WidgetHandler:
@@ -69,14 +70,14 @@ class WidgetHandler:
                     base, other = widgets
                     EventHandler.trigger('AddMidPoint', 'System', {'base': base, 'other': other})
 
-                elif e.key == K_F1:
+                elif e.key == K_RETURN:
                     d = {}
                     for widget in cls.numerable:
                         d[str(widget)] = {'type': widget.tipo}
                         if widget.tipo != 'leaf':
                             d[str(widget)]['leads'] = widget.lead
                         d[str(widget)]['txt'] = System.data[int(widget)]
-                    print(d)
+                    guardar_json('data/output.json', d)
 
                 elif not TriggerMenu.trigger(e.key):
                     if len(cls.selected):

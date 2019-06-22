@@ -14,5 +14,5 @@ def abrir_json(ruta):
 
 
 def guardar_json(ruta, data):
-    with open(ruta, 'w', encoding='utf-8') as file:
-        json.dump(data, file, sort_keys=True, indent=2, separators=(',', ':'))
+    with open(ruta, 'wt', encoding='utf-8') as file:
+        json.dump(data, file, ensure_ascii=False, sort_keys=True, indent=2, separators=(',', ': '))

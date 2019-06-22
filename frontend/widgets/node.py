@@ -8,6 +8,8 @@ from pygame.sprite import Group
 class Node(BaseWidget):
     _layer = 1
     idx = 0
+    type_overriden = False
+    _tipo = 'node'
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -20,6 +22,10 @@ class Node(BaseWidget):
         if other not in self.connections:
             toggle_connection(self, other)
             self.connections.append(other)
+        if len(self.connections) > 1:
+            for child in self.connections:
+                child.type_overriden = True
+                child.tipo = 'branch'
 
     def disconnect(self, other):
         if other in self.connections:
@@ -69,10 +75,16 @@ class Node(BaseWidget):
 
     @property
     def tipo(self):
-        tipo = 'node'
+        tipo = self._tipo
+        if not self.type_overriden:
+            tipo = 'node'
         if not len(self.connections):
             tipo = 'leaf'
         return tipo
+
+    @tipo.setter
+    def tipo(self, value):
+        self._tipo = value
 
     @property
     def lead(self):

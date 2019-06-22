@@ -1,4 +1,4 @@
-# AzoeDialogs v 0.7.0
+# AzoeDialogs v 1.0.0
 Un editor/creador de árboles de diálogo para el proyecto AzoeEngine.
 
 
@@ -9,6 +9,7 @@ Un editor/creador de árboles de diálogo para el proyecto AzoeEngine.
  - "shft+c": elimina la conexión entre los nodos seleccionados.
  - "a": crea un punto intermedio entre dos elementos seleccionados adyacentes.
  - "suprimir": borra todos los objetos seleccionados.
+ - "enter": crea un archivo "output.json" con la estructura del árbol.
  - "escape": cierra el programa.
 
 **Acciones con el mouse**
