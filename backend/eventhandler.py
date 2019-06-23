@@ -14,7 +14,6 @@ class EventHandler:
         Este método es llamado por los objetos que desean recibir un evento particular
         :param listener:es la referencia a una funcion. la misma debe aceptar como parametro un objeto de tipo AzoeEvent
         :param events:lista de string con los eventos que desean registrarse.
-        :type events:tuple
         :return:None
         """
         for event in events:

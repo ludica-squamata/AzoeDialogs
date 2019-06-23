@@ -45,5 +45,4 @@ class Renderer:
         cls.on_selection = evento.data['value']
 
 
-# noinspection PyTypeChecker
-EventHandler.register(Renderer.toggle_selection, 'Selection')
+EventHandler.register(Renderer.toggle_selection, 'EndSelection')

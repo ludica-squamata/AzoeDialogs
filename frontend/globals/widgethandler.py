@@ -1,7 +1,7 @@
 from pygame import event, KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP, MOUSEMOTION, QUIT, K_ESCAPE, K_c, K_a, key
-from pygame import KMOD_LCTRL, KMOD_CTRL, K_RSHIFT, K_LSHIFT, K_RETURN
+from pygame import KMOD_LCTRL, KMOD_CTRL, K_RSHIFT, K_LSHIFT, K_RETURN, K_F1, K_s, mouse
 from pygame.sprite import LayeredUpdates, Group
-from backend import salir, EventHandler, TriggerMenu, System
+from backend import salir, EventHandler, System
 from backend.util import guardar_json
 
 
@@ -79,10 +79,19 @@ class WidgetHandler:
                         d[str(widget)]['txt'] = System.data[int(widget)]
                     guardar_json('data/output.json', d)
 
-                elif not TriggerMenu.trigger(e.key):
-                    if len(cls.selected):
-                        for widget in cls.selected:
-                            widget.on_keydown(e)
+                elif e.key == K_F1:
+                    System.load_data()
+                    diff = len(cls.numerable)-System.lenght
+                    for i in range(diff):
+                        cls.numerable[-1].kill()
+
+                elif e.key == K_s and System.get_lenght() > 0:
+                    x, y = mouse.get_pos()
+                    EventHandler.trigger('AddNode', cls.name, {'pos': [x, y]})
+
+                elif len(cls.selected):
+                    for widget in cls.selected:
+                        widget.on_keydown(e)
 
             elif e.type == KEYUP:
                 if len(cls.selected):
@@ -94,7 +103,7 @@ class WidgetHandler:
                 if not len(widgets) and e.button == 1:
                     if not shift:
                         cls.selected.empty()
-                    EventHandler.trigger('Selection', cls.name, {"pos": e.pos, 'value': True})
+                    EventHandler.trigger('AddSelection', cls.name, {"pos": e.pos, 'value': True})
 
                 elif len(widgets) and not len(cls.selected):
                     cls.selected.add([w for w in widgets if w.selectable])
@@ -132,4 +141,4 @@ class WidgetHandler:
 
 
 # noinspection PyTypeChecker
-EventHandler.register(WidgetHandler.toggle_selection, 'Selection')
+EventHandler.register(WidgetHandler.toggle_selection, 'AddSelection', 'EndSelection')

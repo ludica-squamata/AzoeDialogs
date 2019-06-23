@@ -1,5 +1,6 @@
 from frontend.globals import WidgetHandler, Renderer, COLOR_UNSELECTED, COLOR_SELECTED
-from pygame import Surface, transform, SRCALPHA, BLEND_MAX, BLEND_MIN, font, draw
+from backend.eventhandler import EventHandler
+from pygame import Surface, font
 from .connection import toggle_connection
 from .basewidget import BaseWidget
 from pygame.sprite import Group
@@ -11,12 +12,15 @@ class Node(BaseWidget):
     type_overriden = False
     _tipo = 'node'
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self, x, y):
+        super().__init__()
         self.connections = []
         self.fuente = font.SysFont('Verdana', 10)
         WidgetHandler.add_widget(self)
         Renderer.add_widget(self)
+        self.layer = 1
+        self.image = self.create()
+        self.rect = self.image.get_rect(center=(x, y))
 
     def connect(self, other):
         if other not in self.connections:
@@ -42,7 +46,13 @@ class Node(BaseWidget):
         return [w for w in WidgetHandler.widgets.sprites() if w.numerable].index(self)
 
     def create(self):
-        pass
+        len_idx = len(str(self.get_idx()))
+        size = 16
+        if len_idx == 2:
+            size = 20
+        elif len_idx == 3:
+            size = 25
+        return Surface((size, size))
 
     def update(self, *args):
         self.idx = self.get_idx()
@@ -94,25 +104,6 @@ class Node(BaseWidget):
         elif lenght == 1:
             return int(self.connections[0])
 
-
-class Square(Node):
-    def __init__(self, x, y):
-
-        super().__init__()
-
-        self.layer = 1
-        self.image = self.create()
-        self.rect = self.image.get_rect(center=(x, y))
-
-    def create(self):
-        len_idx = len(str(self.get_idx()))
-        size = 16
-        if len_idx == 2:
-            size = 20
-        elif len_idx == 3:
-            size = 25
-        return Surface((size, size))
-
     def select(self):
         super().select()
         self.image.fill(COLOR_SELECTED)
@@ -122,68 +113,4 @@ class Square(Node):
         self.image.fill(COLOR_UNSELECTED)
 
 
-class Diamond(Node):
-
-    def __init__(self, x, y):
-        super().__init__()
-        len_idx = len(str(self.get_idx()))
-        if len_idx == 1:
-            self.size = 16
-        elif len_idx == 2:
-            self.size = 20
-        elif len_idx == 3:
-            self.size = 25
-        self.layer = 1
-        self.image = self.create()
-        self.rect = self.image.get_rect(center=(x, y))
-
-    def create(self):
-        len_idx = len(str(self.get_idx()))
-        size = 16
-        if len_idx == 2:
-            size = 20
-        elif len_idx == 3:
-            size = 25
-        img = Surface((size, size), SRCALPHA)
-        img.fill(COLOR_UNSELECTED)
-        imagen = transform.rotate(img, 45)
-        return imagen
-
-    def select(self):
-        self.image.fill(COLOR_SELECTED, special_flags=BLEND_MAX)
-        super().select()
-
-    def deselect(self):
-        self.image.fill(COLOR_UNSELECTED, special_flags=BLEND_MIN)
-        super().deselect()
-
-
-class Circle(Node):
-    def __init__(self, x, y):
-        super().__init__()
-        self.image = self.create()
-        self.rect = self.image.get_rect(center=(x, y))
-
-    @property
-    def tipo(self):
-        return 'branch'
-
-    def create(self):
-        len_idx = len(str(self.get_idx()))
-        size = 18
-        if len_idx == 2:
-            size = 20
-        elif len_idx == 3:
-            size = 25
-        imagen = Surface((size, size), SRCALPHA)
-        r = imagen.get_rect()
-        draw.circle(imagen, COLOR_UNSELECTED, r.center, (size//2)+1)
-        return imagen
-
-    def select(self):
-        self.image.fill(COLOR_SELECTED, special_flags=BLEND_MAX)
-        super().select()
-
-    def deselect(self):
-        self.image.fill(COLOR_UNSELECTED, special_flags=BLEND_MIN)
-        super().deselect()
+EventHandler.register(lambda e: Node(*e.data.get('pos')), 'AddNode')

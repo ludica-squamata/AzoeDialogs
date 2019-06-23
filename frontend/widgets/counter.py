@@ -32,5 +32,4 @@ class Counter(BaseWidget):
         self.rect = self.image.get_rect()
 
 
-# noinspection PyTypeChecker
 EventHandler.register(lambda e: Counter(), 'Init')

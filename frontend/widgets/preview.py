@@ -40,5 +40,4 @@ class Preview(BaseWidget):
         self.image.blit(r, (3, 3))
 
 
-# noinspection PyTypeChecker
 EventHandler.register(lambda e: Preview(), 'Init')

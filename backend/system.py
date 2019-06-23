@@ -8,4 +8,9 @@ class System:
 
     @classmethod
     def get_lenght(cls):
-        return cls.lenght-cls.number_of_nodes
+        return len(cls.data)-cls.number_of_nodes
+
+    @classmethod
+    def load_data(cls):
+        cls.data = abrir_json('data/input.json')
+        cls.lenght = len(cls.data)

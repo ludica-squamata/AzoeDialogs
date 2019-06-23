@@ -22,10 +22,13 @@ class Selection(BaseWidget):
             self.rect.height = event.pos[1] - self.rect.y
 
     def on_mouseup(self, event):
-        EventHandler.trigger('Selection', 'SelectionObject', {'value': False})
+        EventHandler.trigger('EndSelection', 'SelectionObject', {'value': False})
         self.rect.normalize()
         Renderer.del_widget(self)
         WidgetHandler.del_widget(self)
 
     def __repr__(self):
         return 'Selection Object @{},{},{},{}'.format(*self.rect)
+
+
+EventHandler.register(lambda e: Selection(e), 'AddSelection')

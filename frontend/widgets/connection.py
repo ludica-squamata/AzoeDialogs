@@ -23,9 +23,7 @@ class Connection(BaseWidget):
         Renderer.add_widget(self)
         WidgetHandler.add_widget(self)
 
-        # noinspection PyTypeChecker
         EventHandler.register(self.event_handle, 'AddMidPoint')
-        # noinspection PyTypeChecker
         EventHandler.register(self.delete, 'Connection')
 
     @staticmethod
