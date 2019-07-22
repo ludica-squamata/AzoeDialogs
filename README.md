@@ -1,4 +1,4 @@
-# AzoeDialogs v 1.1.0
+# AzoeDialogs v 1.2.0
 Un editor/creador de árboles de diálogo para el proyecto AzoeEngine.
 
 
@@ -7,9 +7,11 @@ Un editor/creador de árboles de diálogo para el proyecto AzoeEngine.
  - "c": crea una conexión entre dos nodos seleccionados. 
  - "shft+c": elimina la conexión entre los nodos seleccionados.
  - "a": crea un punto intermedio entre dos elementos seleccionados adyacentes.
- - "suprimir": borra todos los objetos seleccionados.
+ - "d": con un locutor y nodos seleccionados, establece ese locutor para esos nodos.
+ - "suprimir": borra todos los objetos seleccionados. Reemplaza colores en el panel de locutores.
  - "enter": crea un archivo "output.json" con la estructura del árbol.
  - "F1": recarga el archivo input.json y borra los nodos en exceso.
+ - "F2": crea un nuevo color para representar un locutor
  - "escape": cierra el programa.
 
 **Acciones con el mouse**

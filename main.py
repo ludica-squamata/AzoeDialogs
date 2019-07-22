@@ -10,7 +10,7 @@ Renderer.init(640, 480)
 EventHandler.trigger('Init', 'System', {})
 
 while True:
-    fps.tick(30)
+    fps.tick(60)
     EventHandler.process()
     WidgetHandler.update()
     Renderer.update()

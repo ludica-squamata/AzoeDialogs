@@ -1,5 +1,5 @@
-from pygame import event, KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP, MOUSEMOTION, QUIT, K_ESCAPE, K_c, K_a, key
-from pygame import KMOD_LCTRL, KMOD_CTRL, K_RSHIFT, K_LSHIFT, K_RETURN, K_F1, K_s, mouse
+from pygame import event, KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP, MOUSEMOTION, QUIT, K_ESCAPE, key, mouse
+from pygame import KMOD_LCTRL, KMOD_CTRL, K_RSHIFT, K_LSHIFT, K_RETURN, K_F1, K_s, K_d,  K_c, K_a, K_F2
 from pygame.sprite import LayeredUpdates, Group
 from backend import salir, EventHandler, System
 from backend.util import guardar_json
@@ -50,6 +50,9 @@ class WidgetHandler:
         events = event.get([KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP, MOUSEMOTION, QUIT])
         event.clear()
 
+        # esto es para que se pueda reemplazar un locutor sin tener que reseleccionarlo.
+        cls.selected.add([i for i in cls.widgets if i.is_selected and (i not in cls.selected)])
+
         for e in events:
             mods = key.get_mods()
             ctrl = mods & KMOD_CTRL or mods & KMOD_LCTRL
@@ -66,6 +69,7 @@ class WidgetHandler:
                             widgets[0].connect(widgets[1])
                         else:
                             widgets[0].disconnect(widgets[1])
+
                 elif e.key == K_a and len(widgets) == 2:
                     base, other = widgets
                     EventHandler.trigger('AddMidPoint', 'System', {'base': base, 'other': other})
@@ -77,17 +81,28 @@ class WidgetHandler:
                         if widget.tipo != 'leaf':
                             d[str(widget)]['leads'] = widget.lead
                         d[str(widget)]['txt'] = System.data[int(widget)]
+                        d[str(widget)]['from'] = widget.color_name
+                        d[str(widget)]['to'] = widget.interlocutor.color_name
                     guardar_json('data/output.json', d)
 
                 elif e.key == K_F1:
                     System.load_data()
-                    diff = len(cls.numerable)-System.lenght
+                    diff = len(cls.numerable) - System.lenght
                     for i in range(diff):
                         cls.numerable[-1].kill()
+
+                elif e.key == K_F2:
+                    System.new_locutor()
 
                 elif e.key == K_s and System.get_lenght() > 0:
                     x, y = mouse.get_pos()
                     EventHandler.trigger('AddNode', cls.name, {'pos': [x, y]})
+
+                elif e.key == K_d and any([o.order == 'a' for o in widgets]):
+                    widgets.sort(key=lambda o: o.order)
+                    color = widgets.pop(0).color
+                    for other in widgets:
+                        other.colorize(color)
 
                 elif len(cls.selected):
                     for widget in cls.selected:
@@ -102,6 +117,7 @@ class WidgetHandler:
                 widgets = [w for w in cls.widgets.get_sprites_at(e.pos) if w.selectable]
                 if not len(widgets) and e.button == 1:
                     if not shift:
+                        # cls.selected.remove([i for i in cls.selected.sprites() if i.numerable])
                         cls.selected.empty()
                     EventHandler.trigger('AddSelection', cls.name, {"pos": e.pos, 'value': True})
 
@@ -110,6 +126,7 @@ class WidgetHandler:
 
                 elif not cls.selected.has(widgets) and e.button == 1:
                     if not ctrl:
+                        # cls.selected.remove([i for i in cls.selected.sprites() if i.numerable])
                         cls.selected.empty()
                     cls.selected.add(widgets)
 
