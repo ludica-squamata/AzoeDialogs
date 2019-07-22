@@ -1,4 +1,4 @@
-from pygame import display, draw
+from pygame import display, draw, image
 from pygame.sprite import LayeredUpdates
 from .constants import COLOR_BG
 from backend import EventHandler
@@ -13,7 +13,10 @@ class Renderer:
 
     @classmethod
     def init(cls, w, h):
+        display.set_caption('AzoeDialogs')
+        display.set_icon(image.load('frontend/favicon.png'))
         display.set_mode((w, h))
+
         cls.width = w
         cls.height = h
         cls.widgets = LayeredUpdates()
