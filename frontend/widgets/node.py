@@ -20,7 +20,7 @@ class Node(BaseWidget):
 
     interlocutor = None
 
-    def __init__(self, x, y):
+    def __init__(self, data):
         super().__init__()
         self.connections = []
         self.fuente = font.SysFont('Verdana', 10)
@@ -28,7 +28,10 @@ class Node(BaseWidget):
         Renderer.add_widget(self)
         self.layer = 1
         self.image = self.create()
-        self.rect = self.image.get_rect(center=(x, y))
+        if data['color'] is not None:
+            self.colorize(data['color'])
+
+        self.rect = self.image.get_rect(center=data['pos'])
 
     def connect(self, other):
         if other not in self.connections:
@@ -58,6 +61,7 @@ class Node(BaseWidget):
         b.hsla = a.hsla[0], 50, 75, 100
         self.color_a = a
         self.color_b = b
+        self.image.fill(b)
 
     def create(self):
         size = self.size()
@@ -135,4 +139,4 @@ class Node(BaseWidget):
         self.image.fill(self.color_b)
 
 
-EventHandler.register(lambda e: Node(*e.data.get('pos')), 'AddNode')
+EventHandler.register(lambda e: Node(e.data), 'AddNode')

@@ -96,7 +96,11 @@ class WidgetHandler:
 
                 elif e.key == K_s and System.get_lenght() > 0:
                     x, y = mouse.get_pos()
-                    EventHandler.trigger('AddNode', cls.name, {'pos': [x, y]})
+                    color = None
+                    if any([o.order == 'a' for o in widgets]):
+                        color = [i for i in widgets if i.order == 'a'][0].color
+
+                    EventHandler.trigger('AddNode', cls.name, {'pos': [x, y], 'color': color})
 
                 elif e.key == K_d and any([o.order == 'a' for o in widgets]):
                     widgets.sort(key=lambda o: o.order)
