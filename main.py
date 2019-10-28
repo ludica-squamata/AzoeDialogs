@@ -5,7 +5,7 @@ from backend.eventhandler import EventHandler
 
 py_init()
 fps = time.Clock()
-Renderer.init(640, 480)
+Renderer.init()
 
 EventHandler.trigger('Init', 'System', {})
 

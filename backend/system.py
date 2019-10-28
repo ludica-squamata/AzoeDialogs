@@ -1,6 +1,7 @@
+from frontend.globals import WIDTH, HEIGHT
 from .eventhandler import EventHandler
+from pygame import Color, Rect
 from .util import abrir_json
-from pygame import Color
 from random import randint
 
 
@@ -9,6 +10,13 @@ class System:
     lenght = len(data)
     number_of_nodes = 0
     generated_colors = []
+
+    type_mode = False
+    area_nodos = Rect(0, 21, WIDTH // 5 * 4 + 25, HEIGHT // 5 * 4)
+
+    @classmethod
+    def toggle_typemode(cls):
+        cls.type_mode = not cls.type_mode
 
     @classmethod
     def get_lenght(cls):

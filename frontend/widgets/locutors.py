@@ -1,4 +1,5 @@
-from frontend.globals import WidgetHandler, Renderer, COLOR_BOX, COLOR_TEXT, COLOR_UNSELECTED, COLOR_SELECTED
+from frontend.globals import COLOR_BOX, COLOR_TEXT, COLOR_UNSELECTED, COLOR_SELECTED, WIDTH, HEIGHT
+from frontend.globals import WidgetHandler, Renderer
 from backend import EventHandler, System
 from .basewidget import BaseWidget
 from pygame import font, Surface, Color, draw
@@ -15,9 +16,9 @@ class LocutorsPanel(BaseWidget):
         self.fb = font.SysFont('Verdana', 12)
         self.fa.set_underline(1)
 
-        self.image = Surface((Renderer.width // 5-25, (Renderer.height // 5) * 2-10))
+        self.image = Surface((WIDTH // 5-25, (HEIGHT // 5) * 2-10))
         self.image.fill(COLOR_BOX)
-        self.rect = self.image.get_rect(topright=(Renderer.width, 0))
+        self.rect = self.image.get_rect(topright=(WIDTH, 0))
 
         render = self.fa.render('Locutores', 1, COLOR_TEXT, COLOR_BOX)
         renderect = render.get_rect(centerx=self.rect.width // 2)

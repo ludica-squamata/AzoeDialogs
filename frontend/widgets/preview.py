@@ -1,6 +1,6 @@
-from frontend.globals import WidgetHandler, Renderer, COLOR_BOX, COLOR_TEXT
+from frontend.globals import WidgetHandler, Renderer, COLOR_BOX, COLOR_TEXT, WIDTH, HEIGHT
 from .basewidget import BaseWidget
-from backend import System, EventHandler, render_textrect
+from backend import System, render_textrect  # , EventHandler,
 from pygame import font, Surface
 
 
@@ -11,9 +11,9 @@ class Preview(BaseWidget):
     def __init__(self):
         super().__init__()
         self.f = font.SysFont('Verdana', 16)
-        self.image = Surface((Renderer.width, Renderer.height // 5))
+        self.image = Surface((WIDTH, HEIGHT // 5))
         self.image.fill(COLOR_BOX)
-        self.rect = self.image.get_rect(bottomleft=(0, Renderer.height))
+        self.rect = self.image.get_rect(bottomleft=(0, WIDTH))
         WidgetHandler.add_widget(self)
         Renderer.add_widget(self)
 
@@ -40,4 +40,4 @@ class Preview(BaseWidget):
         self.image.blit(r, (3, 3))
 
 
-EventHandler.register(lambda e: Preview(), 'Init')
+# EventHandler.register(lambda e: Preview(), 'Init')

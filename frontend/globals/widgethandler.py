@@ -1,5 +1,5 @@
 from pygame import event, KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP, MOUSEMOTION, QUIT, K_ESCAPE, key, mouse
-from pygame import KMOD_LCTRL, KMOD_CTRL, K_RSHIFT, K_LSHIFT, K_RETURN, K_F1, K_s, K_d,  K_c, K_a, K_F2
+from pygame import KMOD_CTRL, KMOD_SHIFT, K_RETURN, K_F1, K_s, K_d, K_c, K_a, K_F2, K_F3
 from pygame.sprite import LayeredUpdates, Group
 from backend import salir, EventHandler, System
 from backend.util import guardar_json
@@ -55,14 +55,20 @@ class WidgetHandler:
 
         for e in events:
             mods = key.get_mods()
-            ctrl = mods & KMOD_CTRL or mods & KMOD_LCTRL
-            shift = mods & K_LSHIFT or mods & K_RSHIFT
+            ctrl = mods & KMOD_CTRL
+            shift = mods & KMOD_SHIFT
             if e.type == QUIT or (e.type == KEYDOWN and e.key == K_ESCAPE):
                 salir()
 
             elif e.type == KEYDOWN:
                 widgets = cls.selected.sprites()
-                if e.key == K_c:
+                if System.type_mode:
+                    if K_F3:
+                        System.toggle_typemode()
+                    else:
+                        EventHandler.trigger('Key', cls.name, {'key': e.key, 'mod': e.mod})
+
+                elif e.key == K_c:
                     if len(widgets) == 2 and all([o.numerable for o in widgets]):
                         widgets.sort(key=lambda o: o.idx)  # lower idx's go first
                         if not shift:
@@ -94,13 +100,17 @@ class WidgetHandler:
                 elif e.key == K_F2:
                     System.new_locutor()
 
-                elif e.key == K_s and System.get_lenght() > 0:
+                elif e.key == K_F3:
+                    System.toggle_typemode()
+
+                elif e.key == K_s:  # and System.get_lenght() > 0:
                     x, y = mouse.get_pos()
                     color = None
                     if any([o.order == 'a' for o in widgets]):
                         color = [i for i in widgets if i.order == 'a'][0].color
 
-                    EventHandler.trigger('AddNode', cls.name, {'pos': [x, y], 'color': color})
+                    if System.area_nodos.collidepoint(x, y):
+                        EventHandler.trigger('AddNode', cls.name, {'pos': [x, y], 'color': color})
 
                 elif e.key == K_d and any([o.order == 'a' for o in widgets]):
                     widgets.sort(key=lambda o: o.order)
@@ -121,7 +131,6 @@ class WidgetHandler:
                 widgets = [w for w in cls.widgets.get_sprites_at(e.pos) if w.selectable]
                 if not len(widgets) and e.button == 1:
                     if not shift:
-                        # cls.selected.remove([i for i in cls.selected.sprites() if i.numerable])
                         cls.selected.empty()
                     EventHandler.trigger('AddSelection', cls.name, {"pos": e.pos, 'value': True})
 
@@ -130,7 +139,6 @@ class WidgetHandler:
 
                 elif not cls.selected.has(widgets) and e.button == 1:
                     if not ctrl:
-                        # cls.selected.remove([i for i in cls.selected.sprites() if i.numerable])
                         cls.selected.empty()
                     cls.selected.add(widgets)
 
@@ -161,5 +169,4 @@ class WidgetHandler:
         return cls.name + " ({} widgets)".format(str(len(cls.widgets)))
 
 
-# noinspection PyTypeChecker
 EventHandler.register(WidgetHandler.toggle_selection, 'AddSelection', 'EndSelection')
