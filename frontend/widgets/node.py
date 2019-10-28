@@ -98,9 +98,6 @@ class Node(BaseWidget):
     def __repr__(self):
         return self.tipo + ' #' + str(self.idx)
 
-    def __str__(self):
-        return str(self.idx)
-
     def __int__(self):
         return self.idx
 

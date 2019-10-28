@@ -14,6 +14,13 @@ class BaseWidget(Sprite):
         self.parent = parent
         super().__init__()
 
+    @property
+    def center(self):
+        return self.rect.center
+
+    def __getitem__(self, item):
+        return self.rect.center[item]
+
     # event catcher functions
     def on_keydown(self, event):
         if event.key == K_DELETE:
