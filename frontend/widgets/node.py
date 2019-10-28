@@ -1,5 +1,5 @@
 from frontend.globals import WidgetHandler, Renderer, COLOR_UNSELECTED, COLOR_SELECTED
-from pygame import Surface, font, Color, transform
+from pygame import Surface, font, transform, draw
 from backend.eventhandler import EventHandler
 from .connection import toggle_connection
 from .basewidget import BaseWidget
@@ -15,8 +15,9 @@ class Node(BaseWidget):
     tamanio = 16
 
     color_name = ''
-    color_a = COLOR_SELECTED
-    color_b = COLOR_UNSELECTED
+    color_base = COLOR_UNSELECTED
+    color_font = COLOR_SELECTED
+    color_box = COLOR_SELECTED
 
     interlocutor = None
 
@@ -57,16 +58,19 @@ class Node(BaseWidget):
 
     def colorize(self, a):
         self.color_name = '%02x%02x%02x' % (a.r, a.g, a.b)
-        b = Color("white")  # a base color is needed
-        b.hsla = a.hsla[0], 50, 75, 100
-        self.color_a = a
-        self.color_b = b
-        self.image.fill(b)
+        self.color_base = a
+        if (0.2126 * a.r + 0.7152 * a.g + 0.0722 * a.b) < 50:
+            color_b = COLOR_SELECTED
+        else:
+            color_b = COLOR_UNSELECTED
+        self.color_font = color_b
+        self.color_box = color_b
+        self.image.fill(self.color_base)
 
     def create(self):
-        size = self.size()
-        return Surface((size, size))
+        return Surface((self.size, self.size))
 
+    @property
     def size(self):
         len_idx = len(str(self.get_idx()))
         size = self.tamanio
@@ -77,23 +81,18 @@ class Node(BaseWidget):
         return size
 
     def update(self, *args):
-        self.idx = self.get_idx()
-        a = self.color_a
-        b = self.color_b
-        c = COLOR_SELECTED if b == COLOR_UNSELECTED else COLOR_UNSELECTED
-        render_sel = self.fuente.render(str(self.idx), 1, COLOR_UNSELECTED, a)
-        render_uns = self.fuente.render(str(self.idx), 1, c, b)
-        size = self.size() if self.tamanio < self.size() else self.tamanio
-        self.image = transform.scale(self.image, (size, size))
-        self.rect = self.image.get_rect(center=self.rect.center)
-        self.image.blit(render_uns, render_uns.get_rect(center=self.image.get_rect().center))
-
         if self.is_selected:
             self.deselect()
         for g in self.groups():
             if isinstance(g, Group):  # a very clunky way of saying "it's selected"
                 self.select()
-                self.image.blit(render_sel, render_uns.get_rect(center=self.image.get_rect().center))
+
+        self.idx = self.get_idx()
+        render_uns = self.fuente.render(str(self.idx), 1, self.color_font, self.color_base)
+        size = self.size if self.tamanio < self.size else self.tamanio
+        self.image = transform.scale(self.image, (size, size))
+        self.rect = self.image.get_rect(center=self.rect.center)
+        self.image.blit(render_uns, render_uns.get_rect(center=self.image.get_rect().center))
 
     def __repr__(self):
         return self.tipo + ' #' + str(self.idx)
@@ -129,11 +128,12 @@ class Node(BaseWidget):
 
     def select(self):
         super().select()
-        self.image.fill(self.color_a)
+        r = self.rect.copy()
+        draw.rect(self.image, self.color_box, [0, 0, r.w, r.h], 1)
 
     def deselect(self):
         super().deselect()
-        self.image.fill(self.color_b)
+        self.image.fill(self.color_base)
 
 
 EventHandler.register(lambda e: Node(e.data), 'AddNode')

@@ -31,7 +31,8 @@ class System:
         name = cls.generate_color()
         cls.generated_colors.append(name)
         idx = cls.generated_colors.index(name)
-        EventHandler.trigger('NewLocutor', 'System', {'idx': idx, 'name': name, 'replace': False})
+        if idx < 20:
+            EventHandler.trigger('NewLocutor', 'System', {'idx': idx, 'name': name, 'replace': False})
 
     @classmethod
     def replace_locutor(cls, idx):
