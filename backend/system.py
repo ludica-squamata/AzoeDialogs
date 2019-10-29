@@ -17,6 +17,7 @@ class System:
     @classmethod
     def toggle_typemode(cls):
         cls.type_mode = not cls.type_mode
+        EventHandler.trigger('ToggleTypeMode', 'System', {'value': cls.type_mode})
 
     @classmethod
     def get_lenght(cls):

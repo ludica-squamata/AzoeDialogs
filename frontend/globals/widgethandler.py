@@ -63,7 +63,7 @@ class WidgetHandler:
             elif e.type == KEYDOWN:
                 widgets = cls.selected.sprites()
                 if System.type_mode:
-                    if K_F3:
+                    if e.key == K_F3:
                         System.toggle_typemode()
                     else:
                         EventHandler.trigger('Key', cls.name, {'key': e.key, 'mod': e.mod})
@@ -103,7 +103,7 @@ class WidgetHandler:
                 elif e.key == K_F3:
                     System.toggle_typemode()
 
-                elif e.key == K_s:  # and System.get_lenght() > 0:
+                elif e.key == K_s and System.get_lenght() > 0:
                     x, y = mouse.get_pos()
                     color = None
                     if any([o.order == 'a' for o in widgets]):

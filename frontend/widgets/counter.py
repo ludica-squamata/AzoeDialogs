@@ -1,6 +1,6 @@
 from frontend.globals import COLOR_TEXT, COLOR_BG, WidgetHandler, Renderer
 from .basewidget import BaseWidget
-from backend import System  # , EventHandler
+from backend import System, EventHandler
 from pygame import font
 
 
@@ -32,4 +32,4 @@ class Counter(BaseWidget):
         self.rect = self.image.get_rect()
 
 
-# EventHandler.register(lambda e: Counter(), 'Init')
+EventHandler.register(lambda e: Counter(), 'Init')

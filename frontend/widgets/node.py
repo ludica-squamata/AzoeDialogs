@@ -20,6 +20,7 @@ class Node(BaseWidget):
     color_box = COLOR_SELECTED
 
     interlocutor = None
+    numerable = True
 
     def __init__(self, data):
         super().__init__()

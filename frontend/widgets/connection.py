@@ -8,7 +8,6 @@ from .basewidget import BaseWidget
 class Connection(BaseWidget):
     layer = 5
     selectable = False
-    numerable = False
     handles = None
 
     def __init__(self, parent_a, parent_b):
@@ -64,7 +63,6 @@ class Connection(BaseWidget):
 
 
 class MidPointHandle(BaseWidget):
-    numerable = False
 
     def __init__(self, parent, center):
         super().__init__(parent)
