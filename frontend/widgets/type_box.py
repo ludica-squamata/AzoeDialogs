@@ -1,5 +1,6 @@
 from frontend.globals import WidgetHandler, Renderer, COLOR_BOX, COLOR_TEXT, WIDTH, HEIGHT
 from pygame import K_0, K_1, K_2, K_3, K_4, K_5, K_6, K_7, K_8, K_9, KMOD_SHIFT, KMOD_CAPS
+from pygame import K_UP, K_DOWN, K_RIGHT, K_LEFT
 from pygame import Surface, key, font, draw
 from backend import EventHandler, System
 from .basewidget import BaseWidget
@@ -10,6 +11,7 @@ class TypeBox(BaseWidget):
 
     char_x = 0
     char_y = 0
+    cursor_pos = -1
 
     acento = False
     written = False
@@ -28,7 +30,7 @@ class TypeBox(BaseWidget):
         self.cursor = Cursor(self)
         self.cursor.place(self.char_x + 1, self.char_y)
 
-        EventHandler.register(self.typed, 'Key')
+        EventHandler.register(self.filter, 'Key')
         EventHandler.register(self.switch, 'ToggleTypeMode')
 
     @property
@@ -57,6 +59,34 @@ class TypeBox(BaseWidget):
 
     def on_mousemotion(self, event):
         pass
+
+    def filter(self, event):
+        tecla = event.data['key']
+        if tecla == K_UP:
+            pass
+        elif tecla == K_DOWN:
+            pass
+        elif tecla == K_LEFT:
+            if self.cursor_pos > 0:
+                self.cursor_pos -= 1
+
+            char = self.input[self.cursor_pos]
+            if self.char_x - char.w >= 0:
+                self.char_x -= char.w
+
+            self.cursor.place(self.char_x+1, self.char_y)
+
+        elif tecla == K_RIGHT:
+
+            if self.cursor_pos < len(self.input)-1:
+                self.cursor_pos += 1
+
+            char = self.input[self.cursor_pos]
+            if self.char_x < sum([char.w for char in self.input]):
+                self.char_x += char.w
+            self.cursor.place(self.char_x + 1, self.char_y)
+        else:
+            self.typed(event)
 
     def typed(self, event):
         tecla = event.data['key']
@@ -135,6 +165,7 @@ class TypeBox(BaseWidget):
             self.char_x += char.w
             self.cursor.place(self.char_x + 1, self.char_y)
             self.input.append(char)
+            self.cursor_pos += 1
 
     def del_character(self):
         if self.lenght > 0:
@@ -146,6 +177,7 @@ class TypeBox(BaseWidget):
             char.remove()
             self.cursor.place(self.char_x + 1, self.char_y)
             self.input.remove(char)
+            self.cursor_pos -= 1
 
     def clear(self):
         for widget in self.input:
@@ -200,6 +232,9 @@ class Character(BaseWidget):
         Renderer.del_widget(self)
         WidgetHandler.del_widget(self)
 
+    def __repr__(self):
+        return self.char
+
 
 class Space(BaseWidget):
     char = ' '
@@ -222,6 +257,9 @@ class Space(BaseWidget):
     def remove(self):
         Renderer.del_widget(self)
         WidgetHandler.del_widget(self)
+
+    def __repr__(self):
+        return 'space'
 
 
 class Cursor(BaseWidget):
