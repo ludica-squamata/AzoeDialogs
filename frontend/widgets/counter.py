@@ -5,8 +5,6 @@ from pygame import font
 
 
 class Counter(BaseWidget):
-    numerable = False
-    selectable = False
 
     def __init__(self):
         super().__init__()

@@ -5,7 +5,6 @@ from pygame import font, Surface
 
 
 class Preview(BaseWidget):
-    selectable = False
 
     def __init__(self):
         super().__init__()

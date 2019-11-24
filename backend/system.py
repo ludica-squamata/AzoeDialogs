@@ -48,3 +48,12 @@ class System:
         name = cls.generate_color()
         cls.generated_colors.insert(idx, name)
         EventHandler.trigger('NewLocutor', 'System', {'idx': idx, 'name': name, 'replace': True})
+
+    @classmethod
+    def modify_data(cls, data):
+        idx = data['idx']
+        text = data['text']
+        cls.data[idx] = text
+
+
+EventHandler.register(lambda o: System.modify_data(o.data), 'WriteNode')

@@ -2,7 +2,6 @@ from pygame import event, KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP, MOUSEM
 from pygame import KMOD_CTRL, KMOD_SHIFT, K_RETURN, K_F1, K_s, K_d, K_c, K_a, K_F2, K_F3
 from pygame.sprite import LayeredUpdates, Group
 from backend import salir, EventHandler, System
-from backend.util import guardar_json
 
 
 class WidgetHandler:
@@ -81,15 +80,7 @@ class WidgetHandler:
                     EventHandler.trigger('AddMidPoint', 'System', {'base': base, 'other': other})
 
                 elif e.key == K_RETURN:
-                    d = {}
-                    for widget in cls.numerable:
-                        d[str(widget)] = {'type': widget.tipo}
-                        if widget.tipo != 'leaf':
-                            d[str(widget)]['leads'] = widget.lead
-                        d[str(widget)]['txt'] = System.data[int(widget)]
-                        d[str(widget)]['from'] = widget.color_name
-                        d[str(widget)]['to'] = widget.interlocutor.color_name
-                    guardar_json('data/output.json', d)
+                    EventHandler.trigger('CreateDialog', cls.name, {'nodes': cls.numerable})
 
                 elif e.key == K_F1:
                     System.load_data()
@@ -128,9 +119,9 @@ class WidgetHandler:
                         widget.on_keyup(e)
 
             elif e.type == MOUSEBUTTONDOWN:  # pos, button
-                widgets = [w for w in cls.widgets.get_sprites_at(e.pos) if w.selectable]
+                widgets = [w for w in cls.widgets.sprites() if w.selectable and w.rect.collidepoint(e.pos)]
                 if not len(widgets) and e.button == 1:
-                    if not shift:
+                    if not shift and not System.type_mode:
                         cls.selected.empty()
                     EventHandler.trigger('AddSelection', cls.name, {"pos": e.pos, 'value': True})
 
@@ -138,7 +129,7 @@ class WidgetHandler:
                     cls.selected.add([w for w in widgets if w.selectable])
 
                 elif not cls.selected.has(widgets) and e.button == 1:
-                    if not ctrl:
+                    if not ctrl and not System.type_mode:
                         cls.selected.empty()
                     cls.selected.add(widgets)
 
@@ -155,7 +146,7 @@ class WidgetHandler:
                             cls.selected.add(widget)
 
             elif e.type == MOUSEMOTION:  # pos, rel, buttons
-                if e.buttons[0] and len(cls.selected) and not shift:
+                if e.buttons[0] and len(cls.selected) and not shift and not System.type_mode:
                     for widget in cls.selected:
                         widget.on_mousemotion(e)
 

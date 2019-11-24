@@ -7,8 +7,6 @@ from pygame.sprite import Group
 
 
 class LocutorsPanel(BaseWidget):
-    numerable = False
-    selectable = False
 
     def __init__(self):
         super().__init__()
@@ -38,6 +36,7 @@ class LocutorsPanel(BaseWidget):
 
 class LocImage(BaseWidget):
     numerable = False
+    selectable = True
     order = 'a'
 
     def __init__(self, parent, color, dx, dy, idx):

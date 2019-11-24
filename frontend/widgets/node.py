@@ -21,6 +21,7 @@ class Node(BaseWidget):
 
     interlocutor = None
     numerable = True
+    selectable = True
 
     def __init__(self, data):
         super().__init__()
@@ -100,6 +101,9 @@ class Node(BaseWidget):
 
     def __int__(self):
         return self.idx
+
+    def __str__(self):
+        return str(self.idx)
 
     def kill(self):
         WidgetHandler.del_widget(self)

@@ -1,16 +1,18 @@
 from frontend.globals import WidgetHandler, Renderer, COLOR_BOX, COLOR_TEXT, WIDTH, HEIGHT
-from pygame import K_0, K_2, K_3, K_4, K_5, K_6, K_7, K_8, K_9, KMOD_SHIFT, KMOD_CAPS
+from pygame import K_0, K_1, K_2, K_3, K_4, K_5, K_6, K_7, K_8, K_9, KMOD_SHIFT, KMOD_CAPS
 from pygame import Surface, key, font, draw
+from backend import EventHandler, System
 from .basewidget import BaseWidget
-from backend import EventHandler
 
 
 class TypeBox(BaseWidget):
-    selectable = False
     ticks = 0
 
     char_x = 0
     char_y = 0
+
+    acento = False
+    written = False
 
     def __init__(self):
         super().__init__()
@@ -24,7 +26,7 @@ class TypeBox(BaseWidget):
 
         self.input = []
         self.cursor = Cursor(self)
-        self.cursor.place(self.char_x+1, self.char_y)
+        self.cursor.place(self.char_x + 1, self.char_y)
 
         EventHandler.register(self.typed, 'Key')
         EventHandler.register(self.switch, 'ToggleTypeMode')
@@ -38,8 +40,17 @@ class TypeBox(BaseWidget):
             WidgetHandler.add_widget(self)
             Renderer.add_widget(self)
         else:
+            self.return_text()
             WidgetHandler.del_widget(self)
             Renderer.del_widget(self)
+
+    def return_text(self):
+        s = [o for o in WidgetHandler.selected.sprites() if o.numerable]
+        if len(s) == 1 and len(self.input):
+            idx = s[0].idx
+            text = ''.join([i.char for i in self.input])
+            EventHandler.trigger('WriteNode', self, {'idx': idx, 'text': text})
+            self.clear()
 
     def on_mousedown(self, event):
         pass
@@ -51,41 +62,58 @@ class TypeBox(BaseWidget):
         tecla = event.data['key']
         mods = event.data['mod']
         shift = mods & KMOD_SHIFT or mods & KMOD_CAPS
-        name = key.name(tecla).strip('[]')
-        if name == 'space':
-            self.input_character(' ')
-        elif name == 'backspace':
+        raw = key.name(tecla).strip('[]')
+        name = None
+        if raw == 'space':
+            name = ' '
+        elif raw == 'backspace':
             self.del_character()
-        elif name in ['enter', 'return']:
-            self.input_character('\n')
-        elif name.isdecimal():
-            if shift:
-                if tecla == K_0:
-                    name = '='
-                elif tecla == K_2:
-                    name = '"'
-                elif tecla == K_3:
-                    name = '#'
-                elif tecla == K_4:
-                    name = '$'
-                elif tecla == K_5:
-                    name = '%'
-                elif tecla == K_6:
-                    name = '&'
-                elif tecla == K_7:
-                    name = '•'
-                elif tecla == K_8:
-                    name = '('
-                elif tecla == K_9:
-                    name = ')'
-            self.input_character(name)
-        elif name.isalpha and len(name) == 1:
-            if shift:
-                if name == '.':
-                    name = ':'
-                if name == ',':
-                    name = ';'
-                name = name.upper()
+        elif raw in ['enter', 'return']:
+            name = '\n'
+        elif raw.isdecimal():
+            if tecla == K_0:
+                name = '=' if shift else raw
+            elif tecla == K_1:
+                name = '!' if shift else raw
+            elif tecla == K_2:
+                name = '"' if shift else raw
+            elif tecla == K_3:
+                name = '#' if shift else raw
+            elif tecla == K_4:
+                name = '$' if shift else raw
+            elif tecla == K_5:
+                name = '%' if shift else raw
+            elif tecla == K_6:
+                name = '&' if shift else raw
+            elif tecla == K_7:
+                name = '•' if shift else raw
+            elif tecla == K_8:
+                name = '(' if shift else raw
+            elif tecla == K_9:
+                name = ')' if shift else raw
+        elif raw.isalpha and len(raw) == 1:
+            if raw == '.':
+                name = ':' if shift else raw
+            elif raw == ',':
+                name = ';' if shift else raw
+            elif raw == "´":
+                self.acento = True
+            elif raw == "'":
+                name = "?" if shift else "'"
+            elif raw == '¡':
+                name = '¿' if shift else '¡'
+            else:
+                name = raw.upper() if shift else raw
+
+            if self.acento:
+                vowels = 'aeiou'
+                accented_v = 'áéíóú'
+                if raw in vowels:
+                    name = accented_v[vowels.index(raw)]
+                    name = name.upper() if shift else name
+
+        if name is not None:
+            self.acento = False
             self.input_character(name)
 
     def input_character(self, letra):
@@ -105,7 +133,7 @@ class TypeBox(BaseWidget):
         if char is not None:
             char.place(self.char_x, self.char_y)
             self.char_x += char.w
-            self.cursor.place(self.char_x+1, self.char_y)
+            self.cursor.place(self.char_x + 1, self.char_y)
             self.input.append(char)
 
     def del_character(self):
@@ -116,22 +144,46 @@ class TypeBox(BaseWidget):
                 self.char_y = char.y
                 self.char_x = char.x
             char.remove()
-            self.cursor.place(self.char_x+1, self.char_y)
+            self.cursor.place(self.char_x + 1, self.char_y)
             self.input.remove(char)
+
+    def clear(self):
+        for widget in self.input:
+            widget.kill()
+        self.input.clear()
+        self.char_x = self.x
+        self.char_y = self.y
+        self.cursor.kill()
+        self.written = False
+
+    @staticmethod
+    def get_selected():
+        s = [o for o in WidgetHandler.selected.sprites() if o.numerable]
+        if len(s) == 1:
+            idx = s[0].idx
+            text = System.data[idx]
+        else:
+            text = ''
+        return text
 
     def update(self):
         self.image.fill(COLOR_BOX)
+        text = self.get_selected()
+        if text and not self.written:
+            for char in text:
+                self.input_character(char)
+            self.written = True
 
 
 EventHandler.register(lambda e: TypeBox(), 'Init')
 
 
 class Character(BaseWidget):
-    selectable = False
 
     def __init__(self, parent, idx, char, fuente, color_f):
         super().__init__(parent)
         self.fuente = fuente
+        self.char = char
         self.image = self.fuente.render(char, 1, color_f)
         self.rect = self.image.get_rect()
         self.x, self.y, self.w, self.h = self.rect
@@ -150,6 +202,8 @@ class Character(BaseWidget):
 
 
 class Space(BaseWidget):
+    char = ' '
+
     def __init__(self, parent, idx, h, color):
         super().__init__(parent)
         self.image = Surface((10, h))
@@ -172,7 +226,6 @@ class Space(BaseWidget):
 
 class Cursor(BaseWidget):
     ticks = True
-    selectable = False
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -194,6 +247,10 @@ class Cursor(BaseWidget):
         else:
             WidgetHandler.del_widget(self)
             Renderer.del_widget(self)
+
+    def kill(self):
+        super().kill()
+        self.place(self.parent.x, self.parent.y)
 
     def update(self):
         self.ticks = not self.ticks

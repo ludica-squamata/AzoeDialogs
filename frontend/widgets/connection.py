@@ -1,4 +1,4 @@
-from frontend.globals import COLOR_CONNECTION, WidgetHandler, Renderer, COLOR_UNSELECTED, COLOR_SELECTED
+from frontend.globals import COLOR_CONNECTION, WidgetHandler, Renderer, COLOR_UNSELECTED, COLOR_SELECTED, WIDTH, HEIGHT
 from backend.eventhandler import EventHandler
 from pygame import Surface, SRCALPHA, draw, BLEND_MAX, BLEND_MIN
 from pygame.sprite import Group
@@ -7,7 +7,6 @@ from .basewidget import BaseWidget
 
 class Connection(BaseWidget):
     layer = 5
-    selectable = False
     handles = None
 
     def __init__(self, parent_a, parent_b):
@@ -43,8 +42,8 @@ class Connection(BaseWidget):
         self.handles.insert(p, MidPointHandle(self, pc))
 
     def create(self):
-        image = Surface((640, 480), SRCALPHA)
-        draw.aalines(image, COLOR_CONNECTION, 0, [i.center for i in self.handles], 1)
+        image = Surface((WIDTH, HEIGHT), SRCALPHA)
+        draw.aalines(image, COLOR_CONNECTION, 0, [i.center for i in self.handles])
         return image
 
     def delete(self, event):
@@ -63,6 +62,7 @@ class Connection(BaseWidget):
 
 
 class MidPointHandle(BaseWidget):
+    selectable = True
 
     def __init__(self, parent, center):
         super().__init__(parent)
