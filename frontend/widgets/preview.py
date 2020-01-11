@@ -36,7 +36,7 @@ class Preview(BaseWidget):
         elif len(s) > 2:
             t = 'Múltiples nodos están selecionados. Elija sólo uno.'
         else:
-            t = 'Seleccione un nodo para ver su contenido'
+            t = 'No hay nodos seleccionados. Haga click en uno para ver su contenido'
 
         return t
 
