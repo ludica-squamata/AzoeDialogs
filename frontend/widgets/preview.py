@@ -17,7 +17,7 @@ class Preview(BaseWidget):
         Renderer.add_widget(self)
 
     def switch(self, event):
-        if event.data['method'] == 'F3':
+        if event.data['instance'] == 'MainTB':
             if event.data['value'] is False:
                 WidgetHandler.add_widget(self)
                 Renderer.add_widget(self)
@@ -28,16 +28,26 @@ class Preview(BaseWidget):
     @staticmethod
     def get_selected():
         s = [o for o in WidgetHandler.selected.sprites() if o.numerable]
-        if len(s) == 1:
+        c = [d for d in WidgetHandler.selected.sprites() if d.order == 'a']
+        t = ''
+        if len(s) and len(c):
+            ss = 's' if len(s) > 1 else ''
+            elos = 'el' if len(s) == 1 else 'los'
+            t = 'Hay un locutor y {} nodo{} seleccionado{}.'.format(len(s), ss, ss)
+            t += ' Presione D para vincular al locutor con {} nodo{}.'.format(elos, ss)
+        elif len(c) == 1:
+            t = 'Haga doble-clic en el nombre del color (debajo) para editar el nombre del locutor.'
+        elif len(s) == 1:
             idx = s[0].idx
-            t = '"'+System.data[idx]+'"'
+            t = '"' + System.data[idx] + '"'
         elif len(s) == 2:
             t = 'Dos nodos están seleccionados. Presione C para crear una conexión entre ellos,'
             t += ' o A, si ya hay una conexión, para crear un punto intermedio'
         elif len(s) > 2:
-            t = 'Múltiples nodos están selecionados. Elija sólo uno.'
-        else:
-            t = 'No hay nodos seleccionados. Haga click en uno para ver su contenido'
+            t = 'Múltiples nodos están selecionados. Elija sólo uno para ver su contenido o bien dos para crear una'
+            t += ' conexión entre ellos (tecla C).'
+        elif not len(s):
+            t = 'No hay nodos seleccionados. Haga click en uno para ver su contenido o bien toque S para crear un nodo.'
 
         return t
 

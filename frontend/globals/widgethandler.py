@@ -63,7 +63,7 @@ class WidgetHandler:
                 widgets = cls.selected.sprites()
                 if System.type_mode:
                     if e.key == K_F3:
-                        System.toggle_typemode()
+                        System.toggle_typemode('MainTB')
                     else:
                         EventHandler.trigger('Key', cls.name, {'key': e.key, 'mod': e.mod})
 
@@ -93,7 +93,7 @@ class WidgetHandler:
 
                 elif e.key == K_F3:
                     if any([o.order == 'b' for o in widgets]):
-                        System.toggle_typemode('F3')
+                        System.toggle_typemode('MainTB')
 
                 elif e.key == K_s and System.get_lenght() > 0:
                     x, y = mouse.get_pos()

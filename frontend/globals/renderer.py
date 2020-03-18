@@ -19,7 +19,7 @@ class Renderer:
         display.set_mode((WIDTH, HEIGHT))
 
         f = font.SysFont('Verdana', 14)
-        cls.typemode_label = f.render('TypeMode:', 1, COLOR_TEXT, COLOR_BG)
+        cls.typemode_label = f.render('TypeMode (F3):', 1, COLOR_TEXT, COLOR_BG)
         cls.typemode_mark = Surface((19, 19))
         cls.widgets = LayeredUpdates()
 
@@ -47,7 +47,7 @@ class Renderer:
         else:
             color = (255, 0, 0)
 
-        r = fondo.blit(cls.typemode_label, (538, 360))
+        r = fondo.blit(cls.typemode_label, (508, 360))
         cls.typemode_mark.fill(color)
         fondo.blit(cls.typemode_mark, (r.right+3, r.y))
 

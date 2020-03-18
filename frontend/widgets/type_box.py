@@ -20,6 +20,8 @@ class TypeBox(BaseWidget):
         self.image = Surface((w, h))
         self.image.fill(COLOR_BOX)
         self.name = name
+        if self.name == 'MainTB':
+            System.MAIN_TB = self
         self.rect = self.image.get_rect(bottomleft=(x, y))
         self.x, self.y, self.w, self.h = self.rect
         self.right = self.rect.right
@@ -40,18 +42,20 @@ class TypeBox(BaseWidget):
         return len(self.input)
 
     def switch(self, event):
-        instance = event.data['method'] if not event.data['method'] == 'F3' else self
+        instance = System.MAIN_TB if event.data['instance'] == 'MainTB' else event.data['instance']
         if instance is self:
             if event.data['value'] is True:
                 WidgetHandler.add_widget(self)
                 Renderer.add_widget(self)
                 EventHandler.register(self.filter, 'Key')
+                self.cursor.switch(True)
             else:
                 self.return_text()
                 self.clear()
                 WidgetHandler.del_widget(self)
                 Renderer.del_widget(self)
                 EventHandler.deregister(self.filter, 'Key')
+                self.cursor.switch(False)
 
     def return_text(self):
         s = [o for o in WidgetHandler.selected.sprites() if o.numerable]
@@ -289,21 +293,18 @@ class Cursor(BaseWidget):
         self.rect = self.image.get_rect()
         self.x, self.y, self.w, self.h = self.rect
         draw.aaline(self.image, COLOR_TEXT, [1, 0], [1, self.h])
-        EventHandler.register(self.switch, 'ToggleTypeMode')
 
     def place(self, x, y):
         self.rect.topleft = x, y
         self.x, self.y = x, y
 
-    def switch(self, event):
-        instance = event.data['method'] if not event.data['method'] == 'F3' else self.parent
-        if instance is self.parent:
-            if event.data['value'] is True:
-                WidgetHandler.add_widget(self)
-                Renderer.add_widget(self)
-            else:
-                WidgetHandler.del_widget(self)
-                Renderer.del_widget(self)
+    def switch(self, value):
+        if value:
+            WidgetHandler.add_widget(self)
+            Renderer.add_widget(self)
+        else:
+            WidgetHandler.del_widget(self)
+            Renderer.del_widget(self)
 
     def kill(self):
         super().kill()
