@@ -15,9 +15,9 @@ class System:
     area_nodos = Rect(0, 21, WIDTH // 5 * 4 + 25, HEIGHT // 5 * 4)
 
     @classmethod
-    def toggle_typemode(cls):
+    def toggle_typemode(cls, method='F3'):
         cls.type_mode = not cls.type_mode
-        EventHandler.trigger('ToggleTypeMode', 'System', {'value': cls.type_mode})
+        EventHandler.trigger('ToggleTypeMode', 'System', {'method': method, 'value': cls.type_mode})
 
     @classmethod
     def get_lenght(cls):

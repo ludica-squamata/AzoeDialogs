@@ -17,12 +17,13 @@ class Preview(BaseWidget):
         Renderer.add_widget(self)
 
     def switch(self, event):
-        if event.data['value'] is False:
-            WidgetHandler.add_widget(self)
-            Renderer.add_widget(self)
-        else:
-            WidgetHandler.del_widget(self)
-            Renderer.del_widget(self)
+        if event.data['method'] == 'F3':
+            if event.data['value'] is False:
+                WidgetHandler.add_widget(self)
+                Renderer.add_widget(self)
+            else:
+                WidgetHandler.del_widget(self)
+                Renderer.del_widget(self)
 
     @staticmethod
     def get_selected():

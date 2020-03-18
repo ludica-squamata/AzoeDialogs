@@ -1,7 +1,7 @@
 from pygame import event, KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP, MOUSEMOTION, QUIT, K_ESCAPE, key, mouse
 from pygame import KMOD_CTRL, KMOD_SHIFT, K_RETURN, K_F1, K_s, K_d, K_c, K_a, K_F2, K_F3
-from pygame.sprite import LayeredUpdates, Group
-from backend import salir, EventHandler, System
+from backend import salir, EventHandler, System, Selected
+from pygame.sprite import LayeredUpdates
 
 
 class WidgetHandler:
@@ -10,7 +10,7 @@ class WidgetHandler:
     name = "WidgetHandler"
     selection = None
     on_selection = False
-    selected = Group()
+    selected = Selected()
     numerable = []
 
     @classmethod
@@ -92,7 +92,8 @@ class WidgetHandler:
                     System.new_locutor()
 
                 elif e.key == K_F3:
-                    System.toggle_typemode()
+                    if any([o.order == 'b' for o in widgets]):
+                        System.toggle_typemode('F3')
 
                 elif e.key == K_s and System.get_lenght() > 0:
                     x, y = mouse.get_pos()
@@ -105,9 +106,9 @@ class WidgetHandler:
 
                 elif e.key == K_d and any([o.order == 'a' for o in widgets]):
                     widgets.sort(key=lambda o: o.order)
-                    color = widgets.pop(0).color
+                    color_namer = widgets.pop(0)
                     for other in widgets:
-                        other.colorize(color)
+                        other.colorize(color_namer)
 
                 elif len(cls.selected):
                     for widget in cls.selected:
@@ -126,12 +127,13 @@ class WidgetHandler:
                     EventHandler.trigger('AddSelection', cls.name, {"pos": e.pos, 'value': True})
 
                 elif len(widgets) and not len(cls.selected):
-                    cls.selected.add([w for w in widgets if w.selectable])
+                    cls.selected.sumar([w for w in widgets if w.selectable])
 
                 elif not cls.selected.has(widgets) and e.button == 1:
-                    if not ctrl and not System.type_mode:
+                    order_c = [i for i in widgets if i.order == 'c']
+                    if not ctrl and not System.type_mode and not len(order_c):
                         cls.selected.empty()
-                    cls.selected.add(widgets)
+                    cls.selected.sumar(widgets)
 
                 elif len(widgets):  # this is only valid for the mouse wheel
                     for widget in cls.selected:
@@ -141,9 +143,8 @@ class WidgetHandler:
             elif e.type == MOUSEBUTTONUP:  # pos, button
                 if cls.on_selection and e.button == 1:
                     cls.selection.on_mouseup(e)
-                    for widget in cls.widgets:
-                        if cls.selection.rect.contains(widget.rect):
-                            cls.selected.add(widget)
+                    selected = [i for i in cls.widgets if cls.selection.rect.contains(i.rect)]
+                    cls.selected.sumar(selected)
 
             elif e.type == MOUSEMOTION:  # pos, rel, buttons
                 if e.buttons[0] and len(cls.selected) and not shift and not System.type_mode:

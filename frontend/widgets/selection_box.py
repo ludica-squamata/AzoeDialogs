@@ -4,7 +4,7 @@ from .basewidget import BaseWidget
 from pygame import Rect
 
 
-class Selection(BaseWidget):
+class SelectionBox(BaseWidget):
     layer = 0
 
     def __init__(self, event):
@@ -30,4 +30,4 @@ class Selection(BaseWidget):
         return 'Selection Object @{},{},{},{}'.format(*self.rect)
 
 
-EventHandler.register(lambda e: Selection(e), 'AddSelection')
+EventHandler.register(lambda e: SelectionBox(e), 'AddSelection')

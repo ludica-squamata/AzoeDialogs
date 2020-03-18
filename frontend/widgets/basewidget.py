@@ -9,6 +9,8 @@ class BaseWidget(Sprite):
     on_focus = False
     selectable = False
     numerable = False
+    editable = False
+    order = None
 
     def __init__(self, parent=None):
         self.parent = parent
@@ -39,6 +41,13 @@ class BaseWidget(Sprite):
 
     def on_mousemotion(self, event):
         self.rect.move_ip(event.rel)
+
+    def toggle_selection(self, event):
+        if event.data['target'] is self:
+            if event.tipo == 'select':
+                self.select()
+            elif event.tipo == 'deselect':
+                self.deselect()
 
     # state functions
     def select(self):

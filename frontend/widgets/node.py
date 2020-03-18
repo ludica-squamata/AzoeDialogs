@@ -3,7 +3,6 @@ from pygame import Surface, font, transform, draw
 from backend.eventhandler import EventHandler
 from .connection import toggle_connection
 from .basewidget import BaseWidget
-from pygame.sprite import Group
 
 
 class Node(BaseWidget):
@@ -14,7 +13,7 @@ class Node(BaseWidget):
     _tipo = 'node'
     tamanio = 16
 
-    color_name = ''
+    locutor_name = ''
     color_base = COLOR_UNSELECTED
     color_font = COLOR_SELECTED
     color_box = COLOR_SELECTED
@@ -22,6 +21,7 @@ class Node(BaseWidget):
     interlocutor = None
     numerable = True
     selectable = True
+    editable = True
 
     def __init__(self, data):
         super().__init__()
@@ -35,6 +35,7 @@ class Node(BaseWidget):
             self.colorize(data['color'])
 
         self.rect = self.image.get_rect(center=data['pos'])
+        EventHandler.register(self.toggle_selection, 'select', 'deselect')
 
     def connect(self, other):
         if other not in self.connections:
@@ -58,8 +59,9 @@ class Node(BaseWidget):
     def get_idx(self):
         return [w for w in WidgetHandler.widgets.sprites() if w.numerable].index(self)
 
-    def colorize(self, a):
-        self.color_name = '%02x%02x%02x' % (a.r, a.g, a.b)
+    def colorize(self, color_namer):
+        a = color_namer.color
+        self.locutor_name = color_namer.name
         self.color_base = a
         if (0.2126 * a.r + 0.7152 * a.g + 0.0722 * a.b) < 50:
             color_b = COLOR_SELECTED
@@ -83,12 +85,6 @@ class Node(BaseWidget):
         return size
 
     def update(self, *args):
-        if self.is_selected:
-            self.deselect()
-        for g in self.groups():
-            if isinstance(g, Group):  # a very clunky way of saying "it's selected"
-                self.select()
-
         self.idx = self.get_idx()
         render_uns = self.fuente.render(str(self.idx), 1, self.color_font, self.color_base)
         size = self.size if self.tamanio < self.size else self.tamanio

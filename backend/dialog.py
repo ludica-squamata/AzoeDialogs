@@ -19,8 +19,8 @@ class Dialog:
             if node.tipo != 'leaf':
                 cls.nodes[str(node)]['leads'] = node.lead
             cls.nodes[str(node)]['txt'] = System.data[int(node)]
-            cls.nodes[str(node)]['from'] = node.color_name
-            cls.nodes[str(node)]['to'] = node.interlocutor.color_name if node.interlocutor is not None else ''
+            cls.nodes[str(node)]['from'] = node.locutor_name
+            cls.nodes[str(node)]['to'] = node.interlocutor.locutor_name if node.interlocutor is not None else ''
         guardar_json('data/output.json', cls.nodes)
 
 

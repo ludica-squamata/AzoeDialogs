@@ -1,6 +1,6 @@
 from frontend.globals import WidgetHandler, Renderer, COLOR_BOX, COLOR_TEXT, WIDTH, HEIGHT
 from pygame import K_0, K_1, K_2, K_3, K_4, K_5, K_6, K_7, K_8, K_9, KMOD_SHIFT, KMOD_CAPS
-from pygame import K_UP, K_DOWN, K_RIGHT, K_LEFT
+from pygame import K_UP, K_DOWN, K_RIGHT, K_LEFT, K_RETURN, K_KP_ENTER
 from pygame import Surface, key, font, draw
 from backend import EventHandler, System
 from .basewidget import BaseWidget
@@ -9,28 +9,30 @@ from .basewidget import BaseWidget
 class TypeBox(BaseWidget):
     ticks = 0
 
-    char_x = 0
-    char_y = 0
     cursor_pos = -1
 
     acento = False
     written = False
+    name = ''
 
-    def __init__(self):
-        super().__init__()
-        self.image = Surface((WIDTH, HEIGHT // 5))
+    def __init__(self, parent, x, y, w, h, size, name):
+        super().__init__(parent)
+        self.image = Surface((w, h))
         self.image.fill(COLOR_BOX)
-        self.rect = self.image.get_rect(bottomleft=(0, HEIGHT))
+        self.name = name
+        self.rect = self.image.get_rect(bottomleft=(x, y))
         self.x, self.y, self.w, self.h = self.rect
+        self.right = self.rect.right
+        self.left = self.rect.left
+        self.char_x = self.x
         self.char_y = self.y
-        self.f = font.SysFont('Courier New', 16)
+        self.f = font.SysFont('Courier New', size)
         self.altura_del_texto = self.f.get_height()
 
         self.input = []
         self.cursor = Cursor(self)
         self.cursor.place(self.char_x + 1, self.char_y)
 
-        EventHandler.register(self.filter, 'Key')
         EventHandler.register(self.switch, 'ToggleTypeMode')
 
     @property
@@ -38,13 +40,18 @@ class TypeBox(BaseWidget):
         return len(self.input)
 
     def switch(self, event):
-        if event.data['value'] is True:
-            WidgetHandler.add_widget(self)
-            Renderer.add_widget(self)
-        else:
-            self.return_text()
-            WidgetHandler.del_widget(self)
-            Renderer.del_widget(self)
+        instance = event.data['method'] if not event.data['method'] == 'F3' else self
+        if instance is self:
+            if event.data['value'] is True:
+                WidgetHandler.add_widget(self)
+                Renderer.add_widget(self)
+                EventHandler.register(self.filter, 'Key')
+            else:
+                self.return_text()
+                self.clear()
+                WidgetHandler.del_widget(self)
+                Renderer.del_widget(self)
+                EventHandler.deregister(self.filter, 'Key')
 
     def return_text(self):
         s = [o for o in WidgetHandler.selected.sprites() if o.numerable]
@@ -73,18 +80,23 @@ class TypeBox(BaseWidget):
             char = self.input[self.cursor_pos]
             if self.char_x - char.w >= 0:
                 self.char_x -= char.w
-
-            self.cursor.place(self.char_x+1, self.char_y)
+            self.cursor.place(self.char_x + 1, self.char_y)
 
         elif tecla == K_RIGHT:
-
-            if self.cursor_pos < len(self.input)-1:
+            if self.cursor_pos < len(self.input) - 1:
                 self.cursor_pos += 1
 
             char = self.input[self.cursor_pos]
             if self.char_x < sum([char.w for char in self.input]):
                 self.char_x += char.w
             self.cursor.place(self.char_x + 1, self.char_y)
+
+        elif tecla in (K_RETURN, K_KP_ENTER):
+            if self.name == 'MainTB':
+                self.typed(event)
+            else:
+                text = ''.join([i.char for i in self.input])
+                self.parent.update_text(text)
         else:
             self.typed(event)
 
@@ -156,9 +168,9 @@ class TypeBox(BaseWidget):
             char = Space(self, self.lenght, self.altura_del_texto, COLOR_BOX)
         else:
             char = Character(self, self.lenght, letra, self.f, COLOR_TEXT)
-            if self.char_x + char.w > self.w:
+            if self.char_x + char.w > self.right:
                 self.char_y += char.h
-                self.char_x = 0
+                self.char_x = self.left  # 0
 
         if char is not None:
             char.place(self.char_x, self.char_y)
@@ -190,10 +202,12 @@ class TypeBox(BaseWidget):
 
     @staticmethod
     def get_selected():
-        s = [o for o in WidgetHandler.selected.sprites() if o.numerable]
-        if len(s) == 1:
+        s = [o for o in WidgetHandler.selected.sprites() if o.editable]
+        if hasattr(s[0], 'idx'):
             idx = s[0].idx
             text = System.data[idx]
+        elif hasattr(s[0], 'name'):
+            text = s[0].name
         else:
             text = ''
         return text
@@ -206,8 +220,11 @@ class TypeBox(BaseWidget):
                 self.input_character(char)
             self.written = True
 
+    def __repr__(self):
+        return 'TypeBox ' + self.name
 
-EventHandler.register(lambda e: TypeBox(), 'Init')
+
+EventHandler.register(lambda e: TypeBox('System', 0, HEIGHT, WIDTH, HEIGHT // 5, 16, 'MainTB'), 'Init')
 
 
 class Character(BaseWidget):
@@ -279,12 +296,14 @@ class Cursor(BaseWidget):
         self.x, self.y = x, y
 
     def switch(self, event):
-        if event.data['value'] is True:
-            WidgetHandler.add_widget(self)
-            Renderer.add_widget(self)
-        else:
-            WidgetHandler.del_widget(self)
-            Renderer.del_widget(self)
+        instance = event.data['method'] if not event.data['method'] == 'F3' else self.parent
+        if instance is self.parent:
+            if event.data['value'] is True:
+                WidgetHandler.add_widget(self)
+                Renderer.add_widget(self)
+            else:
+                WidgetHandler.del_widget(self)
+                Renderer.del_widget(self)
 
     def kill(self):
         super().kill()

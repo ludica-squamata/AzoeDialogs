@@ -3,7 +3,7 @@ from frontend.globals import WidgetHandler, Renderer
 from backend import EventHandler, System, render_textrect
 from .basewidget import BaseWidget
 from pygame import font, Surface, Color, draw, Rect
-from pygame.sprite import Group
+from .type_box import TypeBox
 
 
 class LocutorsPanel(BaseWidget):
@@ -63,6 +63,7 @@ class LocImage(BaseWidget):
         self.name = name
         self.spr_name = LocName(self)
         self.rect = self.image.get_rect(topleft=(parent.rect.x + dx, parent.rect.y + dy))
+        EventHandler.register(self.toggle_selection, 'select', 'deselect')
         WidgetHandler.add_widget(self)
         Renderer.add_widget(self)
 
@@ -90,12 +91,6 @@ class LocImage(BaseWidget):
         super().kill()
         System.replace_locutor(self.idx)
 
-    def update(self):
-        self.deselect()
-        for g in self.groups():
-            if isinstance(g, Group):  # a very clunky way of saying "it's selected"
-                self.select()
-
     def __repr__(self):
         return 'LocImage #' + str(self.idx)
 
@@ -105,6 +100,8 @@ EventHandler.register(lambda e: LocutorsPanel(), 'Init')
 
 class LocName(BaseWidget):
     selectable = True
+    editable = True
+    order = 'c'
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -115,21 +112,45 @@ class LocName(BaseWidget):
         self.img_uns = render_textrect(self.name, self.f, r, COLOR_TEXT, COLOR_BOX, 1)
         self.img_sel = render_textrect(self.name, self.f, r, COLOR_SELECTED, COLOR_BOX, 1)
         self.image = self.img_uns
-        # WidgetHandler.add_widget(self)
+        WidgetHandler.add_widget(self)
+        EventHandler.register(self.toggle_selection, 'select', 'deselect')
+        self.t_box = TypeBox(self, r.x, r.bottom, r.w, r.h, 14, self.name)
 
     def show(self):
         Renderer.add_widget(self)
+        WidgetHandler.add_widget(self)
 
     def hide(self):
         Renderer.del_widget(self)
+        WidgetHandler.del_widget(self)
 
-    # def select(self):
-    #     super().select()
-    #     self.image = self.img_sel
-    #
-    # def deselect(self):
-    #     super().deselect()
-    #     self.image = self.img_uns
-    #
-    # def on_mousedown(self, event):
-    #     self.select()
+    def select(self):
+        super().select()
+        self.image = self.img_sel
+
+    def deselect(self):
+        super().deselect()
+        self.image = self.img_uns
+
+    def update_text(self, new):
+        self.name = new
+        self.t_box.name = new
+        self.parent.name = new
+
+        r = self.rect
+        self.img_uns = render_textrect(self.name, self.f, r, COLOR_TEXT, COLOR_BOX, 1)
+        self.img_sel = render_textrect(self.name, self.f, r, COLOR_SELECTED, COLOR_BOX, 1)
+        self.image = self.img_uns
+
+        System.toggle_typemode(self.t_box)
+        self.show()
+
+    def on_mousedown(self, event):
+        if not self.is_selected:
+            self.select()
+        else:
+            self.hide()
+            System.toggle_typemode(self.t_box)
+
+    def __repr__(self):
+        return 'LocName ' + self.name
