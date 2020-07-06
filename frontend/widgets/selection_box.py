@@ -17,12 +17,21 @@ class SelectionBox(BaseWidget):
 
     def on_mousemotion(self, event):
         if event.buttons[0]:
-            self.rect.width = event.pos[0] - self.rect.x
-            self.rect.height = event.pos[1] - self.rect.y
+            dx, dy = event.rel
+            if dx < 0:
+                self.rect.x += dx
+                self.rect.width += abs(dx)
+            elif dx > 0:
+                self.rect.width += dx
+
+            if dy < 0:
+                self.rect.y += dy
+                self.rect.height += abs(dy)
+            elif dy > 0:
+                self.rect.height += dy
 
     def on_mouseup(self, event):
         EventHandler.trigger('EndSelection', 'SelectionObject', {'value': False})
-        self.rect.normalize()
         Renderer.del_widget(self)
         WidgetHandler.del_widget(self)
 

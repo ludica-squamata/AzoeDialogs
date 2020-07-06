@@ -1,11 +1,11 @@
 from pygame import event, KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP, MOUSEMOTION, QUIT, K_ESCAPE, key, mouse
 from pygame import KMOD_CTRL, KMOD_SHIFT, K_RETURN, K_F1, K_s, K_d, K_c, K_a, K_F2, K_F3
 from backend import salir, EventHandler, System, Selected
-from pygame.sprite import LayeredUpdates
+from backend.group import WidgetGroup
 
 
 class WidgetHandler:
-    widgets = LayeredUpdates()
+    widgets = WidgetGroup()
     active_widget = None
     name = "WidgetHandler"
     selection = None
@@ -60,7 +60,7 @@ class WidgetHandler:
                 salir()
 
             elif e.type == KEYDOWN:
-                widgets = cls.selected.sprites()
+                widgets = cls.selected.widgets()
                 if System.type_mode:
                     if e.key == K_F3:
                         System.toggle_typemode('MainTB')
@@ -94,6 +94,9 @@ class WidgetHandler:
                 elif e.key == K_F3:
                     if any([o.order == 'b' for o in widgets]):
                         System.toggle_typemode('MainTB')
+                    else:
+                        for widget in widgets:
+                            widget.on_keydown(e)
 
                 elif e.key == K_s and System.get_lenght() > 0:
                     x, y = mouse.get_pos()
@@ -120,11 +123,12 @@ class WidgetHandler:
                         widget.on_keyup(e)
 
             elif e.type == MOUSEBUTTONDOWN:  # pos, button
-                widgets = [w for w in cls.widgets.sprites() if w.selectable and w.rect.collidepoint(e.pos)]
+                widgets = [w for w in cls.widgets.widgets() if w.selectable and w.rect.collidepoint(e.pos)]
                 if not len(widgets) and e.button == 1:
                     if not shift and not System.type_mode:
                         cls.selected.empty()
-                    EventHandler.trigger('AddSelection', cls.name, {"pos": e.pos, 'value': True})
+                    if not ctrl:
+                        EventHandler.trigger('AddSelection', cls.name, {"pos": e.pos, 'value': True})
 
                 elif len(widgets) and not len(cls.selected):
                     cls.selected.sumar([w for w in widgets if w.selectable])
@@ -153,6 +157,11 @@ class WidgetHandler:
 
                 elif cls.on_selection and e.buttons[0]:
                     cls.selection.on_mousemotion(e)
+
+                elif ctrl and e.buttons[0]:
+                    widgets = [w for w in cls.widgets.widgets() if w.selectable]
+                    for widget in widgets:
+                        widget.on_mousemotion(e)
 
         cls.widgets.update()
 

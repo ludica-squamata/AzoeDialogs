@@ -206,11 +206,11 @@ class TypeBox(BaseWidget):
 
     @staticmethod
     def get_selected():
-        s = [o for o in WidgetHandler.selected.sprites() if o.editable]
-        if hasattr(s[0], 'idx'):
+        s = [o for o in WidgetHandler.selected.widgets() if o.editable]
+        if len(s) > 0 and hasattr(s[0], 'idx'):
             idx = s[0].idx
             text = System.data[idx]
-        elif hasattr(s[0], 'name'):
+        elif len(s) > 0 and hasattr(s[0], 'name'):
             text = s[0].name
         else:
             text = ''

@@ -27,8 +27,8 @@ class Preview(BaseWidget):
 
     @staticmethod
     def get_selected():
-        s = [o for o in WidgetHandler.selected.sprites() if o.numerable]
-        c = [d for d in WidgetHandler.selected.sprites() if d.order == 'a']
+        s = [o for o in WidgetHandler.selected.widgets() if o.numerable]
+        c = [d for d in WidgetHandler.selected.widgets() if d.order == 'a']
         t = ''
         if len(s) and len(c):
             ss = 's' if len(s) > 1 else ''
@@ -36,7 +36,7 @@ class Preview(BaseWidget):
             t = 'Hay un locutor y {} nodo{} seleccionado{}.'.format(len(s), ss, ss)
             t += ' Presione D para vincular al locutor con {} nodo{}.'.format(elos, ss)
         elif len(c) == 1:
-            t = 'Haga doble-clic en el nombre del color (debajo) para editar el nombre del locutor.'
+            t = 'Presione F3 para editar el nombre del locutor seleccionado.'
         elif len(s) == 1:
             idx = s[0].idx
             t = '"' + System.data[idx] + '"'

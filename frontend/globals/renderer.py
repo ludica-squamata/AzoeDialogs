@@ -41,13 +41,13 @@ class Renderer:
         fondo = display.get_surface()
         rect = [fondo.fill(COLOR_BG)]
         if cls.on_selection:
-            draw.rect(fondo, cls.selection.color, cls.selection.rect, 1)
+            draw.rect(fondo, cls.selection.color, cls.selection.rect, width=1, border_radius=10)
         if System.type_mode:
             color = (0, 255, 0)
         else:
             color = (255, 0, 0)
 
-        r = fondo.blit(cls.typemode_label, (508, 360))
+        r = fondo.blit(cls.typemode_label, (505, 360))
         cls.typemode_mark.fill(color)
         fondo.blit(cls.typemode_mark, (r.right+3, r.y))
 

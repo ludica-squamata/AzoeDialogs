@@ -1,8 +1,8 @@
-from pygame.sprite import Group
+from backend.group import WidgetGroup
 from .eventhandler import EventHandler
 
 
-class Selected(Group):
+class Selected(WidgetGroup):
     def __init__(self):
         super().__init__()
 

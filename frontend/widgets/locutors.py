@@ -1,8 +1,8 @@
 from frontend.globals import COLOR_BOX, COLOR_TEXT, COLOR_UNSELECTED, COLOR_SELECTED, WIDTH, HEIGHT
-from frontend.globals import WidgetHandler, Renderer
+from pygame import font, Surface, Color, draw, Rect, K_F3
 from backend import EventHandler, System, render_textrect
+from frontend.globals import WidgetHandler, Renderer
 from .basewidget import BaseWidget
-from pygame import font, Surface, Color, draw, Rect
 from .type_box import TypeBox
 
 
@@ -85,6 +85,10 @@ class LocImage(BaseWidget):
     def on_mousemotion(self, event):
         pass
 
+    def on_keydown(self, event):
+        if event.key == K_F3:
+            System.toggle_typemode(self.spr_name.t_box)
+
     def kill(self):
         WidgetHandler.del_widget(self)
         Renderer.del_widget(self)
@@ -144,13 +148,6 @@ class LocName(BaseWidget):
 
         System.toggle_typemode(self.t_box)
         self.show()
-
-    def on_mousedown(self, event):
-        if not self.is_selected:
-            self.select()
-        else:
-            self.hide()
-            System.toggle_typemode(self.t_box)
 
     def __repr__(self):
         return 'LocName ' + self.name
