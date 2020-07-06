@@ -1,4 +1,4 @@
-# AzoeDialogs v 1.2.2
+# AzoeDialogs v 1.4.1
 Un editor/creador de árboles de diálogo para el proyecto AzoeEngine.
 
 
