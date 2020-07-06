@@ -1,4 +1,4 @@
-# AzoeDialogs v 1.2.1
+# AzoeDialogs v 1.2.2
 Un editor/creador de árboles de diálogo para el proyecto AzoeEngine.
 
 
@@ -11,13 +11,15 @@ Un editor/creador de árboles de diálogo para el proyecto AzoeEngine.
  - "suprimir": borra todos los objetos seleccionados. Reemplaza colores en el panel de locutores.
  - "enter": crea un archivo "output.json" con la estructura del árbol.
  - "F1": recarga el archivo input.json y borra los nodos en exceso.
- - "F2": crea un nuevo color para representar un locutor
+ - "F2": crea un nuevo color para representar un locutor.
+ - "F3": habilita la edición del texto del nodo, o el nombre del locutor seleccionado.
  - "escape": cierra el programa.
 
 **Acciones con el mouse**
 - Click (sobre un objeto): Selecciona. Otros objetos se deseleccionan.
-- Ctrl+click: Selecciona otros objetos manteniendo la selección.
 - Click (sobre el canvas): deselecciona todos los objetos.
+- Ctrl+click: Selecciona otros objetos manteniendo la selección.
+- Ctrl+Click (sobre el canvas) y arrastrar: desplaza a todos los nodos simultáneamente.
+- Click (sobre un objeto) y arrastrar: mueve un objeto seleccionado.
 - Click (sobre el canvas) y arrastrar: mantener para crear una caja de selección.
 - Shift+click y arrastrar: crea una caja de selección sin deseleccionar los demás objetos.
-- Click (sobre un objeto) y arrastrar: mueve un objeto seleccionado.
