@@ -1,7 +1,6 @@
 from frontend.globals import COLOR_CONNECTION, WidgetHandler, Renderer, COLOR_UNSELECTED, COLOR_SELECTED, WIDTH, HEIGHT
-from backend.eventhandler import EventHandler
 from pygame import Surface, SRCALPHA, draw, BLEND_MAX, BLEND_MIN
-from pygame.sprite import Group
+from backend.eventhandler import EventHandler
 from .basewidget import BaseWidget
 
 
@@ -43,7 +42,7 @@ class Connection(BaseWidget):
 
     def create(self):
         image = Surface((WIDTH, HEIGHT), SRCALPHA)
-        draw.aalines(image, COLOR_CONNECTION, 0, [i.center for i in self.handles])
+        draw.lines(image, COLOR_CONNECTION, 0, [i.center for i in self.handles])
         return image
 
     def delete(self, event):
@@ -71,6 +70,7 @@ class MidPointHandle(BaseWidget):
         self.rect = self.image.get_rect(center=center)
         Renderer.add_widget(self)
         WidgetHandler.add_widget(self)
+        EventHandler.register(self.toggle_selection, 'select', 'deselect')
 
     def on_keydown(self, event):
         if super().on_keydown(event):
@@ -91,11 +91,6 @@ class MidPointHandle(BaseWidget):
     def update(self, *args):
         if not self.parent.alive():
             self.kill()
-        if self.is_selected:
-            self.deselect()
-        for g in self.groups():
-            if isinstance(g, Group):  # a very clunky way of saying "it's selected"
-                self.select()
 
     def __repr__(self):
         return 'MidPoint #'+str(self.idx)
