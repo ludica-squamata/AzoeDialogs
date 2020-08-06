@@ -1,5 +1,5 @@
 from frontend.globals import WIDTH, HEIGHT, COLOR_TEXT
-from pygame import display, draw, image, font, Surface
+from pygame import display, image, font, Surface, draw
 from pygame.sprite import LayeredUpdates
 from .constants import COLOR_BG
 from backend import EventHandler, System
@@ -40,8 +40,6 @@ class Renderer:
     def update(cls):
         fondo = display.get_surface()
         rect = [fondo.fill(COLOR_BG)]
-        if cls.on_selection:
-            draw.rect(fondo, cls.selection.color, cls.selection.rect, width=1, border_radius=10)
         if System.type_mode:
             color = (0, 255, 0)
         else:
@@ -52,6 +50,12 @@ class Renderer:
         fondo.blit(cls.typemode_mark, (r.right+3, r.y))
 
         rect.extend(cls.widgets.draw(fondo))
+        if cls.on_selection:
+            corners = [cls.selection.rect.topleft,
+                       cls.selection.rect.topright,
+                       cls.selection.rect.bottomright,
+                       cls.selection.rect.bottomleft]
+            draw.aalines(fondo, cls.selection.color, 1, corners)
         display.update(rect)
 
     @classmethod
