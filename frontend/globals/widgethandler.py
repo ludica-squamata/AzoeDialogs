@@ -152,14 +152,14 @@ class WidgetHandler:
 
             elif e.type == MOUSEMOTION:  # pos, rel, buttons
                 if e.buttons[0] and len(cls.selected) and not shift and not System.type_mode:
-                    for widget in cls.selected:
+                    for widget in [i for i in cls.selected if i.draggable is True]:
                         widget.on_mousemotion(e)
 
                 elif cls.on_selection and e.buttons[0]:
                     cls.selection.on_mousemotion(e)
 
                 elif ctrl and e.buttons[0]:
-                    widgets = [w for w in cls.widgets.widgets() if w.selectable]
+                    widgets = [w for w in cls.widgets.widgets() if w.selectable and w.draggable]
                     for widget in widgets:
                         widget.on_mousemotion(e)
 

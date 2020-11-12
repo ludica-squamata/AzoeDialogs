@@ -10,6 +10,7 @@ class BaseWidget(Sprite):
     selectable = False
     numerable = False
     editable = False
+    draggable = True
     order = None
 
     def __init__(self, parent=None):

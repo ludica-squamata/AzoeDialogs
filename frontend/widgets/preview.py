@@ -39,7 +39,11 @@ class Preview(BaseWidget):
             t = 'Presione F3 para editar el nombre del locutor seleccionado.'
         elif len(s) == 1:
             idx = s[0].idx
-            t = '"' + System.data[idx] + '"'
+            if not s[0].named:
+                t = '"' + System.data[idx] + '"'
+            else:
+                t = s[0].locutor_name+': "' + System.data[idx] + '"'
+
         elif len(s) == 2:
             t = 'Dos nodos están seleccionados. Presione C para crear una conexión entre ellos,'
             t += ' o A, si ya hay una conexión, para crear un punto intermedio'

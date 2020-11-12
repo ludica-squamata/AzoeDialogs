@@ -14,6 +14,7 @@ class Node(BaseWidget):
     tamanio = 16
 
     locutor_name = ''
+    named = False
     color_base = COLOR_UNSELECTED
     color_font = COLOR_SELECTED
     color_box = COLOR_SELECTED
@@ -62,6 +63,7 @@ class Node(BaseWidget):
     def colorize(self, color_namer):
         a = color_namer.color if hasattr(color_namer, 'color') else color_namer
         self.locutor_name = color_namer.name if hasattr(color_namer, 'name') else '%02x%02x%02x' % (a.r, a.g, a.b)
+        self.named = True if hasattr(color_namer, 'name') else False
         self.color_base = a
         if (0.2126 * a.r + 0.7152 * a.g + 0.0722 * a.b) < 50:
             color_b = COLOR_SELECTED
@@ -70,6 +72,10 @@ class Node(BaseWidget):
         self.color_font = color_b
         self.color_box = color_b
         self.image.fill(self.color_base)
+
+    def name_locutor(self, new_name):
+        self.locutor_name = new_name
+        self.named = True
 
     def create(self):
         return Surface((self.size, self.size))

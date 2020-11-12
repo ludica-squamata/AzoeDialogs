@@ -52,6 +52,7 @@ class LocutorsPanel(BaseWidget):
 class LocImage(BaseWidget):
     numerable = False
     selectable = True
+    draggable = False
     order = 'a'
 
     def __init__(self, parent, name, color, dx, dy, idx):
@@ -82,9 +83,6 @@ class LocImage(BaseWidget):
         self.image.fill(self.color)
         self.spr_name.hide()
 
-    def on_mousemotion(self, event):
-        pass
-
     def on_keydown(self, event):
         if event.key == K_F3:
             System.toggle_typemode(self.spr_name.t_box)
@@ -105,6 +103,7 @@ EventHandler.register(lambda e: LocutorsPanel(), 'Init')
 class LocName(BaseWidget):
     selectable = True
     editable = True
+    draggable = False
     order = 'c'
 
     def __init__(self, parent):
@@ -137,9 +136,12 @@ class LocName(BaseWidget):
         self.image = self.img_uns
 
     def update_text(self, new):
+        nodes = [n for n in WidgetHandler.numerable if n.locutor_name == self.name]
         self.name = new
         self.t_box.name = new
         self.parent.name = new
+        for node in nodes:
+            node.name_locutor(new)
 
         r = self.rect
         self.img_uns = render_textrect(self.name, self.f, r, COLOR_TEXT, COLOR_BOX, 1)
