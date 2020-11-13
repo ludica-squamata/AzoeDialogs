@@ -15,6 +15,13 @@ class TypeBox(BaseWidget):
     written = False
     name = ''
 
+    line_lenght = 0
+    current_line = 0
+    line_lenghts = None
+    draggable = False
+    cursor_at_left = True
+    selectable = True
+
     def __init__(self, parent, x, y, w, h, size, name):
         super().__init__(parent)
         self.image = Surface((w, h))
@@ -31,15 +38,12 @@ class TypeBox(BaseWidget):
         self.f = font.SysFont('Courier New', size)
         self.altura_del_texto = self.f.get_height()
 
-        self.input = []
+        self.line_lenghts = []
+        self.lines = [[]]
         self.cursor = Cursor(self)
         self.cursor.place(self.char_x + 1, self.char_y)
 
         EventHandler.register(self.switch, 'ToggleTypeMode')
-
-    @property
-    def lenght(self):
-        return len(self.input)
 
     def switch(self, event):
         instance = System.MAIN_TB if event.data['instance'] == 'MainTB' else event.data['instance']
@@ -59,47 +63,78 @@ class TypeBox(BaseWidget):
 
     def return_text(self):
         s = [o for o in WidgetHandler.selected.sprites() if o.numerable]
-        if len(s) == 1 and len(self.input):
+        if len(s) == 1 and any([len(line) for line in self.lines]):
             idx = s[0].idx
-            text = ''.join([i.char for i in self.input])
+            text = '\n'.join([''.join(line) for line in self.lines])
             EventHandler.trigger('WriteNode', self, {'idx': idx, 'text': text})
             self.clear()
 
     def on_mousedown(self, event):
-        pass
-
-    def on_mousemotion(self, event):
-        pass
+        pos = event.pos
+        flat_list = [item for sublist in self.lines for item in sublist]
+        for char in flat_list:
+            if char.rect.collidepoint(pos):
+                self.char_y = char.rect.y
+                self.char_x = char.rect.left
+                self.cursor_pos = self.lines[char.line].index(char)-1
+                self.cursor.place(self.char_x - 1, self.char_y)
 
     def filter(self, event):
         tecla = event.data['key']
         if tecla == K_UP:
-            pass
+            if self.current_line - 1 >= 0:
+                self.char_y -= 17
+                self.current_line -= 1
+                self.cursor.place(self.char_x - 1, self.char_y)
+
         elif tecla == K_DOWN:
-            pass
+            if self.current_line + 1 < len(self.lines):
+                self.char_y += 17
+                self.current_line += 1
+                self.cursor.place(self.char_x - 1, self.char_y)
+
         elif tecla == K_LEFT:
             if self.cursor_pos > 0:
                 self.cursor_pos -= 1
 
-            char = self.input[self.cursor_pos]
-            if self.char_x - char.w >= 0:
-                self.char_x -= char.w
-            self.cursor.place(self.char_x + 1, self.char_y)
+            elif self.current_line - 1 >= 0:
+                self.current_line -= 1
+                self.char_y -= 17
+                self.cursor_pos = len(self.lines[self.current_line]) - 1
+            else:
+                self.cursor_at_left = False
+
+            char = self.lines[self.current_line][self.cursor_pos]
+            if self.cursor_at_left:
+                self.char_x = char.rect.right
+            else:
+                self.char_x = char.rect.left
+
+            self.cursor.place(self.char_x - 1, self.char_y)
 
         elif tecla == K_RIGHT:
-            if self.cursor_pos < len(self.input) - 1:
+            if self.cursor_pos + 1 < len(self.lines[self.current_line]):
                 self.cursor_pos += 1
+            elif self.current_line + 1 < len(self.lines):
+                self.cursor_pos = 0
+                self.char_x = 0
+                self.char_y += 17
+                self.current_line += 1
+            else:
+                self.cursor_at_left = True
 
-            char = self.input[self.cursor_pos]
-            if self.char_x < sum([char.w for char in self.input]):
-                self.char_x += char.w
-            self.cursor.place(self.char_x + 1, self.char_y)
+            char = self.lines[self.current_line][self.cursor_pos]
+            if not self.cursor_at_left:
+                self.char_x = char.rect.left
+            else:
+                self.char_x = char.rect.right
+            self.cursor.place(self.char_x - 1, self.char_y)
 
         elif tecla in (K_RETURN, K_KP_ENTER):
             if self.name == 'MainTB':
                 self.typed(event)
             else:
-                text = ''.join([i.char for i in self.input])
+                text = ''.join([i.char for i in self.lines[self.current_line]])
                 self.parent.update_text(text)
         else:
             self.typed(event)
@@ -166,43 +201,51 @@ class TypeBox(BaseWidget):
         if letra == '\n':
             self.char_y += 17
             self.char_x = self.x
-            self.cursor.place(self.char_x + 1, self.char_y)
+            self.cursor.place(self.char_x - 1, self.char_y)
             char = None
+            self.line_lenght = 0
+            self.cursor_pos = 0
+            self.current_line += 1
+            self.lines.append([])
+
         elif letra == ' ':
-            char = Space(self, self.lenght, self.altura_del_texto, COLOR_BOX)
+            char = Space(self, self.line_lenght, self.altura_del_texto, COLOR_BOX)
         else:
-            char = Character(self, self.lenght, letra, self.f, COLOR_TEXT)
+            char = Character(self, self.line_lenght, letra, self.f, COLOR_TEXT)
             if self.char_x + char.w > self.right:
                 self.char_y += char.h
                 self.char_x = self.left  # 0
 
         if char is not None:
-            char.place(self.char_x, self.char_y)
+            char.place(self.char_x, self.char_y, self.current_line)
             self.char_x += char.w
-            self.cursor.place(self.char_x + 1, self.char_y)
-            self.input.append(char)
+            self.cursor.place(self.char_x - 1, self.char_y)
+            self.lines[self.current_line].append(char)
             self.cursor_pos += 1
 
     def del_character(self):
-        if self.lenght > 0:
-            char = self.input[-1]
+        if self.line_lenght > 0:
+            char = self.lines[self.current_line][-1]
             self.char_x -= char.w
             if self.char_x < 0:
                 self.char_y = char.y
                 self.char_x = char.x
             char.remove()
             self.cursor.place(self.char_x + 1, self.char_y)
-            self.input.remove(char)
+            self.lines[self.current_line].remove(char)
             self.cursor_pos -= 1
+            self.line_lenght -= 1
 
     def clear(self):
-        for widget in self.input:
+        flat_list = [item for sublist in self.lines for item in sublist]
+        for widget in flat_list:
             widget.kill()
-        self.input.clear()
+        self.lines = [[]]
         self.char_x = self.x
         self.char_y = self.y
         self.cursor.kill()
         self.written = False
+        self.line_lenght = 0
 
     @staticmethod
     def get_selected():
@@ -233,6 +276,7 @@ EventHandler.register(lambda e: TypeBox('System', 0, HEIGHT, WIDTH, HEIGHT // 5,
 
 
 class Character(BaseWidget):
+    line = None
 
     def __init__(self, parent, idx, char, fuente, color_f):
         super().__init__(parent)
@@ -246,9 +290,10 @@ class Character(BaseWidget):
         Renderer.add_widget(self)
         WidgetHandler.add_widget(self)
 
-    def place(self, x, y):
+    def place(self, x, y, line):
         self.x, self.y = x, y
         self.rect.move_ip(x, y)
+        self.line = line
 
     def remove(self):
         Renderer.del_widget(self)
@@ -260,6 +305,7 @@ class Character(BaseWidget):
 
 class Space(BaseWidget):
     char = ' '
+    line = None
 
     def __init__(self, parent, idx, h, color):
         super().__init__(parent)
@@ -272,9 +318,10 @@ class Space(BaseWidget):
         Renderer.add_widget(self)
         WidgetHandler.add_widget(self)
 
-    def place(self, x, y):
+    def place(self, x, y, line):
         self.x, self.y = x, y
         self.rect.move_ip(x, y)
+        self.line = line
 
     def remove(self):
         Renderer.del_widget(self)

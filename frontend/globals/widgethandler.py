@@ -1,5 +1,5 @@
 from pygame import event, KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP, MOUSEMOTION, QUIT, K_ESCAPE, key, mouse
-from pygame import KMOD_CTRL, KMOD_SHIFT, K_RETURN, K_F1, K_s, K_d, K_c, K_a, K_F2, K_F3, K_F5
+from pygame import KMOD_CTRL, KMOD_SHIFT, K_RETURN, K_F1, K_s, K_d, K_c, K_a, K_F2, K_F3, K_F5, Rect
 from backend import salir, EventHandler, System, Selected
 from backend.group import WidgetGroup
 
@@ -12,6 +12,7 @@ class WidgetHandler:
     on_selection = False
     selected = Selected()
     numerable = []
+    active_area = Rect(0, 21, 537, 363)
 
     @classmethod
     def add_widget(cls, widget):
@@ -127,7 +128,7 @@ class WidgetHandler:
 
             elif e.type == MOUSEBUTTONDOWN:  # pos, button
                 widgets = [w for w in cls.widgets.widgets() if w.selectable and w.rect.collidepoint(e.pos)]
-                if not len(widgets) and e.button == 1:
+                if not len(widgets) and e.button == 1 and cls.active_area.collidepoint(e.pos):
                     if not shift and not System.type_mode:
                         cls.selected.empty()
                     if not ctrl:
@@ -136,7 +137,7 @@ class WidgetHandler:
                 elif len(widgets) and not len(cls.selected):
                     cls.selected.sumar([w for w in widgets if w.selectable])
 
-                elif not cls.selected.has(widgets) and e.button == 1:
+                elif not cls.selected.has(widgets) and e.button == 1 and len(widgets):
                     order_c = [i for i in widgets if i.order == 'c']
                     if not ctrl and not System.type_mode and not len(order_c):
                         cls.selected.empty()
