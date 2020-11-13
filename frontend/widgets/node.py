@@ -28,9 +28,9 @@ class Node(BaseWidget):
         super().__init__()
         self.connections = []
         self.fuente = font.SysFont('Verdana', 10)
+        self.layer = 1
         WidgetHandler.add_widget(self)
         Renderer.add_widget(self)
-        self.layer = 1
         self.image = self.create()
         if data['color'] is not None:
             self.colorize(data['color'])

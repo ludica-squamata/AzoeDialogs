@@ -1,6 +1,6 @@
 from frontend.globals import WidgetHandler, Renderer, COLOR_BOX, COLOR_TEXT, WIDTH, HEIGHT
 from pygame import K_0, K_1, K_2, K_3, K_4, K_5, K_6, K_7, K_8, K_9, KMOD_SHIFT, KMOD_CAPS
-from pygame import K_UP, K_DOWN, K_RIGHT, K_LEFT, K_RETURN, K_KP_ENTER
+from pygame import K_UP, K_DOWN, K_RIGHT, K_LEFT, K_RETURN, K_KP_ENTER, K_END, K_HOME
 from pygame import Surface, key, font, draw
 from backend import EventHandler, System
 from .basewidget import BaseWidget
@@ -9,7 +9,7 @@ from .basewidget import BaseWidget
 class TypeBox(BaseWidget):
     ticks = 0
 
-    cursor_pos = -1
+    cursor_pos = 0
 
     acento = False
     written = False
@@ -81,26 +81,47 @@ class TypeBox(BaseWidget):
 
     def filter(self, event):
         tecla = event.data['key']
+
         if tecla == K_UP:
             if self.current_line - 1 >= 0:
                 self.char_y -= 17
                 self.current_line -= 1
+                if self.cursor_pos > len(self.lines[self.current_line]):
+                    self.cursor_pos = len(self.lines[self.current_line]) - 1
+                    char = self.lines[self.current_line][self.cursor_pos]
+                    if self.cursor_at_left:
+                        self.char_x = char.rect.left
+                    else:
+                        self.char_x = char.rect.right
+                    self.cursor_at_left = True
                 self.cursor.place(self.char_x - 1, self.char_y)
 
         elif tecla == K_DOWN:
             if self.current_line + 1 < len(self.lines):
                 self.char_y += 17
                 self.current_line += 1
+                if self.cursor_pos > len(self.lines[self.current_line]):
+                    self.cursor_pos = len(self.lines[self.current_line])-1
+                    char = self.lines[self.current_line][self.cursor_pos]
+                    if self.cursor_at_left:
+                        self.char_x = char.rect.left
+                    else:
+                        self.char_x = char.rect.right
+                    self.cursor_at_left = True
                 self.cursor.place(self.char_x - 1, self.char_y)
 
         elif tecla == K_LEFT:
             if self.cursor_pos > 0:
                 self.cursor_pos -= 1
 
+            elif self.cursor_pos == 0 and self.cursor_at_left:
+                self.cursor_at_left = False
+
             elif self.current_line - 1 >= 0:
                 self.current_line -= 1
                 self.char_y -= 17
                 self.cursor_pos = len(self.lines[self.current_line]) - 1
+                self.cursor_at_left = True
             else:
                 self.cursor_at_left = False
 
@@ -115,16 +136,39 @@ class TypeBox(BaseWidget):
         elif tecla == K_RIGHT:
             if self.cursor_pos + 1 < len(self.lines[self.current_line]):
                 self.cursor_pos += 1
+            elif self.cursor_pos == len(self.lines[self.current_line])-1 and not self.cursor_at_left:
+                self.cursor_at_left = True
             elif self.current_line + 1 < len(self.lines):
                 self.cursor_pos = 0
                 self.char_x = 0
                 self.char_y += 17
                 self.current_line += 1
+                self.cursor_at_left = False
             else:
                 self.cursor_at_left = True
 
             char = self.lines[self.current_line][self.cursor_pos]
             if not self.cursor_at_left:
+                self.char_x = char.rect.left
+            else:
+                self.char_x = char.rect.right
+            self.cursor.place(self.char_x - 1, self.char_y)
+
+        elif tecla == K_HOME:
+            self.cursor_pos = 0
+            self.cursor_at_left = True
+            char = self.lines[self.current_line][self.cursor_pos]
+            if self.cursor_at_left:
+                self.char_x = char.rect.left
+            else:
+                self.char_x = char.rect.right
+            self.cursor.place(self.char_x - 1, self.char_y)
+
+        elif tecla == K_END:
+            self.cursor_pos = len(self.lines[self.current_line]) - 1
+            self.cursor_at_left = False
+            char = self.lines[self.current_line][self.cursor_pos]
+            if self.cursor_at_left:
                 self.char_x = char.rect.left
             else:
                 self.char_x = char.rect.right
@@ -199,14 +243,35 @@ class TypeBox(BaseWidget):
 
     def input_character(self, letra):
         if letra == '\n':
-            self.char_y += 17
-            self.char_x = self.x
-            self.cursor.place(self.char_x - 1, self.char_y)
             char = None
-            self.line_lenght = 0
-            self.cursor_pos = 0
-            self.current_line += 1
-            self.lines.append([])
+            if self.cursor_pos == len(self.lines[self.current_line])-1:
+                self.char_y += 17
+                self.char_x = self.x
+                self.cursor.place(self.char_x - 1, self.char_y)
+                self.line_lenght = 0
+                self.cursor_pos = 0
+                self.current_line += 1
+                self.lines.append([])
+            else:
+                char = None
+                if not self.cursor_at_left:
+                    p = self.cursor_pos
+                else:
+                    p = self.cursor_pos+1
+                self.cursor_pos = 0
+                a = self.lines[self.current_line][0:p]
+                b = self.lines[self.current_line][p:]
+                self.lines.insert(self.current_line+1, b)
+                self.lines[self.current_line] = a
+                self.current_line += 1
+                self.char_x = self.x
+                self.char_y += 17
+                self.cursor_at_left = False
+                dx = 0
+                for _char in b:
+                    _char.move(dx, self.char_y, self.current_line)
+                    dx += _char.rect.w
+                self.cursor.place(self.char_x, self.char_y)
 
         elif letra == ' ':
             char = Space(self, self.line_lenght, self.altura_del_texto, COLOR_BOX)
@@ -220,7 +285,9 @@ class TypeBox(BaseWidget):
             char.place(self.char_x, self.char_y, self.current_line)
             self.char_x += char.w
             self.cursor.place(self.char_x - 1, self.char_y)
-            self.lines[self.current_line].append(char)
+            self.lines[self.current_line].insert(self.cursor_pos, char)
+            for _c in self.lines[self.current_line][self.cursor_pos+1:]:
+                _c.rect.x += char.w
             self.cursor_pos += 1
 
     def del_character(self):
@@ -275,7 +342,22 @@ class TypeBox(BaseWidget):
 EventHandler.register(lambda e: TypeBox('System', 0, HEIGHT, WIDTH, HEIGHT // 5, 16, 'MainTB'), 'Init')
 
 
-class Character(BaseWidget):
+class BaseCharacter(BaseWidget):
+    line = None
+    x, y = 0, 0
+
+    def place(self, x, y, line):
+        self.x, self.y = x, y
+        self.rect.move_ip(x, y)
+        self.line = line
+
+    def move(self, x, y, line):
+        self.x, self.y = x, y
+        self.rect.topleft = x, y
+        self.line = line
+
+
+class Character(BaseCharacter):
     line = None
 
     def __init__(self, parent, idx, char, fuente, color_f):
@@ -290,11 +372,6 @@ class Character(BaseWidget):
         Renderer.add_widget(self)
         WidgetHandler.add_widget(self)
 
-    def place(self, x, y, line):
-        self.x, self.y = x, y
-        self.rect.move_ip(x, y)
-        self.line = line
-
     def remove(self):
         Renderer.del_widget(self)
         WidgetHandler.del_widget(self)
@@ -303,7 +380,7 @@ class Character(BaseWidget):
         return self.char
 
 
-class Space(BaseWidget):
+class Space(BaseCharacter):
     char = ' '
     line = None
 
@@ -317,11 +394,6 @@ class Space(BaseWidget):
         self.idx = idx
         Renderer.add_widget(self)
         WidgetHandler.add_widget(self)
-
-    def place(self, x, y, line):
-        self.x, self.y = x, y
-        self.rect.move_ip(x, y)
-        self.line = line
 
     def remove(self):
         Renderer.del_widget(self)

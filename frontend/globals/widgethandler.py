@@ -51,7 +51,7 @@ class WidgetHandler:
         event.clear()
 
         # esto es para que se pueda reemplazar un locutor sin tener que reseleccionarlo.
-        cls.selected.add([i for i in cls.widgets if i.is_selected and (i not in cls.selected)])
+        cls.selected.add([i for i in cls.widgets.widgets() if i.is_selected and (i not in cls.selected)])
 
         for e in events:
             mods = key.get_mods()
@@ -118,12 +118,12 @@ class WidgetHandler:
                     System.toggle_input_mode()
 
                 elif len(cls.selected):
-                    for widget in cls.selected:
+                    for widget in cls.selected.widgets():
                         widget.on_keydown(e)
 
             elif e.type == KEYUP:
                 if len(cls.selected):
-                    for widget in cls.selected:
+                    for widget in cls.selected.widgets():
                         widget.on_keyup(e)
 
             elif e.type == MOUSEBUTTONDOWN:  # pos, button
@@ -144,7 +144,7 @@ class WidgetHandler:
                     cls.selected.sumar(widgets)
 
                 elif len(widgets):  # this is only valid for the mouse wheel
-                    for widget in cls.selected:
+                    for widget in cls.selected.widgets():
                         if widget is not cls.selection:
                             widget.on_mousedown(e)
 
@@ -156,7 +156,7 @@ class WidgetHandler:
 
             elif e.type == MOUSEMOTION:  # pos, rel, buttons
                 if e.buttons[0] and len(cls.selected) and not shift and not System.type_mode:
-                    for widget in [i for i in cls.selected if i.draggable is True]:
+                    for widget in [i for i in cls.selected.widgets() if i.draggable is True]:
                         widget.on_mousemotion(e)
 
                 elif cls.on_selection and e.buttons[0]:
