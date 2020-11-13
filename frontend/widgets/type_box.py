@@ -207,13 +207,14 @@ class TypeBox(BaseWidget):
     @staticmethod
     def get_selected():
         s = [o for o in WidgetHandler.selected.widgets() if o.editable]
+        text = ''
         if len(s) > 0 and hasattr(s[0], 'idx'):
             idx = s[0].idx
-            text = System.data[idx]
+            if 0 <= idx < len(System.data):
+                text = System.data[idx]
         elif len(s) > 0 and hasattr(s[0], 'name'):
             text = s[0].name
-        else:
-            text = ''
+
         return text
 
     def update(self):

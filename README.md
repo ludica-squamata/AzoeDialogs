@@ -1,4 +1,4 @@
-# AzoeDialogs v 1.4.2
+# AzoeDialogs v 1.4.3
 Un editor/creador de árboles de diálogo para el proyecto AzoeEngine.
 
 
@@ -13,6 +13,7 @@ Un editor/creador de árboles de diálogo para el proyecto AzoeEngine.
  - "F1": recarga el archivo input.json y borra los nodos en exceso.
  - "F2": crea un nuevo color para representar un locutor.
  - "F3": habilita la edición del texto del nodo, o el nombre del locutor seleccionado.
+ - "F5": alterna entre los modos, permitiendo que se añadan nuevos por encima del limite del diálogo.
  - "escape": cierra el programa.
 
 **Acciones con el mouse**

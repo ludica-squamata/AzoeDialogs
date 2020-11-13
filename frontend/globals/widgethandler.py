@@ -1,5 +1,5 @@
 from pygame import event, KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP, MOUSEMOTION, QUIT, K_ESCAPE, key, mouse
-from pygame import KMOD_CTRL, KMOD_SHIFT, K_RETURN, K_F1, K_s, K_d, K_c, K_a, K_F2, K_F3
+from pygame import KMOD_CTRL, KMOD_SHIFT, K_RETURN, K_F1, K_s, K_d, K_c, K_a, K_F2, K_F3, K_F5
 from backend import salir, EventHandler, System, Selected
 from backend.group import WidgetGroup
 
@@ -98,7 +98,7 @@ class WidgetHandler:
                         for widget in widgets:
                             widget.on_keydown(e)
 
-                elif e.key == K_s and System.get_lenght() > 0:
+                elif e.key == K_s and (System.get_lenght() > 0 or System.limit_input is False):
                     x, y = mouse.get_pos()
                     color = None
                     if any([o.order == 'a' for o in widgets]):
@@ -112,6 +112,9 @@ class WidgetHandler:
                     color_namer = widgets.pop(0)
                     for other in widgets:
                         other.colorize(color_namer)
+
+                elif e.key == K_F5:
+                    System.toggle_input_mode()
 
                 elif len(cls.selected):
                     for widget in cls.selected:

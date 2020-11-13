@@ -39,10 +39,15 @@ class Preview(BaseWidget):
             t = 'Presione F3 para editar el nombre del locutor seleccionado.'
         elif len(s) == 1:
             idx = s[0].idx
-            if not s[0].named:
-                t = '"' + System.data[idx] + '"'
+            if 0 <= idx < len(System.data):
+                n = System.data[idx]
             else:
-                t = s[0].locutor_name+': "' + System.data[idx] + '"'
+                n = ''
+
+            if not s[0].named:
+                t = '"' + n + '"'
+            else:
+                t = s[0].locutor_name+': "' + n + '"'
 
         elif len(s) == 2:
             t = 'Dos nodos están seleccionados. Presione C para crear una conexión entre ellos,'
@@ -51,7 +56,11 @@ class Preview(BaseWidget):
             t = 'Múltiples nodos están selecionados. Elija sólo uno para ver su contenido o bien dos para crear una'
             t += ' conexión entre ellos (tecla C).'
         elif not len(s):
-            t = 'No hay nodos seleccionados. Haga click en uno para ver su contenido o bien toque S para crear un nodo.'
+            t = 'No hay nodos seleccionados. Haga click en uno para ver su contenido'
+            if not System.limit_input or System.get_lenght() > 0:
+                t += ' o bien toque S para crear un nodo.'
+            else:
+                t += '.'
 
         return t
 
