@@ -5,7 +5,6 @@ from .basewidget import BaseWidget
 
 
 class Connection(BaseWidget):
-    layer = 5
     handles = None
 
     def __init__(self, parent_a, parent_b):
@@ -15,6 +14,7 @@ class Connection(BaseWidget):
         self.handles = [self.parent_a, self.parent_b]
         self.image = self.create()
         self.rect = self.image.get_rect()
+        self.layer = min([self.parent_a.layer, self.parent_b.layer])-1
         Renderer.add_widget(self)
         WidgetHandler.add_widget(self)
 
@@ -42,7 +42,7 @@ class Connection(BaseWidget):
 
     def create(self):
         image = Surface((WIDTH, HEIGHT), SRCALPHA)
-        draw.lines(image, COLOR_CONNECTION, 0, [i.center for i in self.handles])
+        draw.aalines(image, COLOR_CONNECTION, 0, [i.center for i in self.handles])
         return image
 
     def delete(self, event):
@@ -65,6 +65,7 @@ class MidPointHandle(BaseWidget):
 
     def __init__(self, parent, center):
         super().__init__(parent)
+        self.layer = 20
         self.image = Surface((8, 8), SRCALPHA)
         draw.circle(self.image, COLOR_CONNECTION, (3, 3), 4)
         self.rect = self.image.get_rect(center=center)

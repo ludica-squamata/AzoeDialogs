@@ -16,6 +16,7 @@ class System:
     MAIN_TB = None
 
     limit_input = True
+    replacing_locutor = False
 
     @classmethod
     def toggle_typemode(cls, typebox):
@@ -58,6 +59,7 @@ class System:
     def replace_locutor(cls, idx):
         name = cls.generate_color()
         cls.generated_colors[idx] = name
+        cls.replacing_locutor = True
         EventHandler.trigger('NewLocutor', 'System', {'idx': idx, 'name': name, 'replace': True})
 
     @classmethod
