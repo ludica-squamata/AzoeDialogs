@@ -46,6 +46,7 @@ class LocutorsPanel(BaseWidget):
         name = event.data.get('name')
         a = LocImage(self, name, Color('0x' + name), r.right + 2, r.y + 2, idx)
         if event.data['replace']:
+            System.replacing_locutor = False
             a.select()
 
 
@@ -86,6 +87,7 @@ class LocImage(BaseWidget):
     def on_keydown(self, event):
         if event.key == K_F3:
             System.toggle_typemode(self.spr_name.t_box)
+        super().on_keydown(event)
 
     def kill(self):
         WidgetHandler.del_widget(self)

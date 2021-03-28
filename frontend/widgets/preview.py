@@ -35,8 +35,8 @@ class Preview(BaseWidget):
             elos = 'el' if len(s) == 1 else 'los'
             t = 'Hay un locutor y {} nodo{} seleccionado{}.'.format(len(s), ss, ss)
             t += ' Presione D para vincular al locutor con {} nodo{}.'.format(elos, ss)
-        elif len(c) == 1:
-            t = 'Presione F3 para editar el nombre del locutor seleccionado.'
+        elif len(c) == 1 or System.replacing_locutor:
+            t = 'Presione F3 para editar el nombre del locutor seleccionado, o SUPR para cambiar su color.'
         elif len(s) == 1:
             idx = s[0].idx
             if 0 <= idx < len(System.data):

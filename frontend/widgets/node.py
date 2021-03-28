@@ -6,7 +6,6 @@ from .basewidget import BaseWidget
 
 
 class Node(BaseWidget):
-    _layer = 1
     idx = 0
     order = 'b'
     type_overriden = False

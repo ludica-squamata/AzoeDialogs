@@ -11,6 +11,6 @@ EventHandler.trigger('Init', 'System', {})
 
 while True:
     fps.tick(60)
-    EventHandler.process()
-    WidgetHandler.update()
     Renderer.update()
+    WidgetHandler.update()
+    EventHandler.process()

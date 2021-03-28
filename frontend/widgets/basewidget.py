@@ -3,7 +3,6 @@ from pygame import K_DELETE
 
 
 class BaseWidget(Sprite):
-    image = None
     rect = None
     is_selected = False
     on_focus = False
@@ -16,6 +15,10 @@ class BaseWidget(Sprite):
     def __init__(self, parent=None):
         self.parent = parent
         super().__init__()
+        if self.parent is not None:
+            self.layer = self.parent.layer + 1
+        else:
+            self.layer = 1
 
     @property
     def center(self):

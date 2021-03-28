@@ -143,10 +143,31 @@ class WidgetHandler:
                         cls.selected.empty()
                     cls.selected.sumar(widgets)
 
-                elif len(widgets):  # this is only valid for the mouse wheel
+                if len(widgets):
                     for widget in cls.selected.widgets():
                         if widget is not cls.selection:
                             widget.on_mousedown(e)
+
+                elif e.button != 1:
+                    widgets = [w for w in cls.widgets.widgets() if w.numerable]
+                    if ctrl and not shift:
+                        dx, dy = 1, 0
+                    elif shift and not ctrl:
+                        dx, dy = 0, 5
+                    elif ctrl and shift:
+                        dx, dy = 5, 0
+                    else:
+                        dx, dy = 0, 1
+
+                    for widget in widgets:
+                        if e.button == 4:
+                            dx *= -1
+                            dy *= -1
+                        elif e.button == 5:
+                            dx *= 1
+                            dy *= 1
+
+                        widget.rect.move_ip(dx, dy)
 
             elif e.type == MOUSEBUTTONUP:  # pos, button
                 if cls.on_selection and e.button == 1:
