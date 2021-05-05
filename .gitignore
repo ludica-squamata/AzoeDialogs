@@ -1,3 +1,9 @@
 .idea
 __pycache__
 /data/output.json
+/changelog.txt
+/build/
+/installer.nsi
+/installer.py
+/setup.py
+/data/

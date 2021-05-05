@@ -1,13 +1,14 @@
 from frontend.globals import WIDTH, HEIGHT
 from .eventhandler import EventHandler
+from os import getcwd, path, mkdir
 from pygame import Color, Rect
 from .util import abrir_json
 from random import randint
 
 
 class System:
-    data = abrir_json('data/input.json')
-    lenght = len(data)
+    data = {}
+    lenght = 0
     number_of_nodes = 0
     generated_colors = []
 
@@ -17,6 +18,11 @@ class System:
 
     limit_input = True
     replacing_locutor = False
+
+    @classmethod
+    def init(cls):
+        if path.exists(path.join(getcwd(), 'data', 'input.json')):
+            cls.load_data()
 
     @classmethod
     def toggle_typemode(cls, typebox):
@@ -37,8 +43,9 @@ class System:
 
     @classmethod
     def load_data(cls):
-        cls.data = abrir_json('data/input.json')
-        cls.lenght = len(cls.data)
+        if path.exists(path.join(getcwd(), 'data', 'input.json')):
+            cls.data = abrir_json('data/input.json')
+            cls.lenght = len(cls.data)
 
     @classmethod
     def generate_color(cls):
@@ -70,3 +77,9 @@ class System:
 
 
 EventHandler.register(lambda o: System.modify_data(o.data), 'WriteNode')
+
+ruta = path.join(getcwd(), 'data')
+if not path.exists(ruta):
+    mkdir(ruta)
+
+System.init()

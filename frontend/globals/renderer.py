@@ -1,8 +1,9 @@
 from frontend.globals import WIDTH, HEIGHT, COLOR_TEXT
 from pygame import display, image, font, Surface, draw
 from pygame.sprite import LayeredUpdates
-from .constants import COLOR_BG
 from backend import EventHandler, System
+from .constants import COLOR_BG
+from os import getcwd, path
 
 
 class Renderer:
@@ -15,7 +16,11 @@ class Renderer:
     @classmethod
     def init(cls):
         display.set_caption('AzoeDialogs')
-        display.set_icon(image.load('frontend/favicon.png'))
+        if path.exists(path.join(getcwd(), 'lib')):
+            prefix = 'lib/'
+        else:
+            prefix = ''
+        display.set_icon(image.load(prefix+'frontend/favicon.png'))
         display.set_mode((WIDTH, HEIGHT))
 
         f = font.SysFont('Verdana', 14)
