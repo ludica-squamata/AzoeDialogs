@@ -172,6 +172,7 @@ class WidgetHandler:
             elif e.type == MOUSEBUTTONUP:  # pos, button
                 if cls.on_selection and e.button == 1:
                     cls.selection.on_mouseup(e)
+                    cls.selection.rect.normalize()
                     selected = [i for i in cls.widgets if cls.selection.rect.contains(i.rect)]
                     cls.selected.sumar(selected)
 
