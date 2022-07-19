@@ -13,9 +13,11 @@ class Renderer:
     typemode_label = None
     typemode_mark = None
 
+    mode_label = None
+
     @classmethod
     def init(cls):
-        display.set_caption('AzoeDialogs')
+        display.set_caption('Azoe Integration')
         if path.exists(path.join(getcwd(), 'lib')):
             prefix = 'lib/'
         else:
@@ -24,6 +26,7 @@ class Renderer:
         display.set_mode((WIDTH, HEIGHT))
 
         f = font.SysFont('Verdana', 14)
+        cls.mode_label = f.render('Toggle Mode (F4)', 1, COLOR_TEXT, COLOR_BG)
         cls.typemode_label = f.render('TypeMode (F3):', 1, COLOR_TEXT, COLOR_BG)
         cls.typemode_mark = Surface((19, 19))
         cls.widgets = LayeredUpdates()
@@ -34,8 +37,8 @@ class Renderer:
         cls.on_selection = True
 
     @classmethod
-    def add_widget(cls, widget):
-        cls.widgets.add(widget)
+    def add_widget(cls, widget, layer=0):
+        cls.widgets.add(widget, layer=layer)
 
     @classmethod
     def del_widget(cls, widget):
@@ -53,6 +56,8 @@ class Renderer:
         r = fondo.blit(cls.typemode_label, (505, 360))
         cls.typemode_mark.fill(color)
         fondo.blit(cls.typemode_mark, (r.right+3, r.y))
+        r2 = cls.mode_label.get_rect(bottom=r.top-2, left=r.left)
+        fondo.blit(cls.mode_label, r2)
 
         rect.extend(cls.widgets.draw(fondo))
         if cls.on_selection:

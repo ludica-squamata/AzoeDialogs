@@ -4,9 +4,10 @@ from backend import EventHandler, System, render_textrect
 from frontend.globals import WidgetHandler, Renderer
 from .basewidget import BaseWidget
 from .type_box import TypeBox
+from .sidebox import SideBox
 
 
-class LocutorsPanel(BaseWidget):
+class LocutorsPanel(SideBox):
 
     def __init__(self):
         super().__init__()

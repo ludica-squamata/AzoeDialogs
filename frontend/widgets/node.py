@@ -1,8 +1,9 @@
-from frontend.globals import WidgetHandler, Renderer, COLOR_UNSELECTED, COLOR_SELECTED
+from frontend.globals import WidgetHandler, Renderer, COLOR_UNSELECTED, COLOR_SELECTED, NODOS_DIALOGO, NODOS_BEHAVIOUR
 from pygame import Surface, font, transform, draw
 from backend.eventhandler import EventHandler
 from .connection import toggle_connection
 from .basewidget import BaseWidget
+from backend.system import System
 
 
 class Node(BaseWidget):
@@ -27,12 +28,14 @@ class Node(BaseWidget):
         super().__init__()
         self.connections = []
         self.fuente = font.SysFont('Verdana', 10)
-        self.layer = 1
-        WidgetHandler.add_widget(self)
-        Renderer.add_widget(self)
+        self.group = System.widget_group_key
+        self.tipo = data['text'] if data['text'] is not None else 'leaf'
+        WidgetHandler.add_widget(self, layer=System.widget_group_key)
+        Renderer.add_widget(self, layer=System.widget_group_key)
         self.image = self.create()
         if data['color'] is not None:
             self.colorize(data['color'])
+            self.text = data['text']
 
         self.rect = self.image.get_rect(center=data['pos'])
         EventHandler.register(self.toggle_selection, 'select', 'deselect')
@@ -57,7 +60,13 @@ class Node(BaseWidget):
             self.connections.remove(other)
 
     def get_idx(self):
-        return [w for w in WidgetHandler.widgets.sprites() if w.numerable].index(self)
+        g = System.widget_group_key
+        sprites = WidgetHandler.widgets.get_widgets_from_layer(g)
+        numerables = [w for w in sprites if w.numerable]
+        if self in numerables:
+            return numerables.index(self)
+        else:
+            return self.idx
 
     def colorize(self, color_namer):
         a = color_namer.color if hasattr(color_namer, 'color') else color_namer
@@ -140,6 +149,27 @@ class Node(BaseWidget):
     def deselect(self):
         super().deselect()
         self.image.fill(self.color_base)
+
+    def toggle(self, event):
+        if event.data['mode'] == 'dialog':
+            if self.group == NODOS_DIALOGO:
+                self.show()
+            else:
+                self.hide()
+
+        elif event.data['mode'] == 'behaviour':
+            if self.group == NODOS_BEHAVIOUR:
+                self.show()
+            else:
+                self.hide()
+
+    def show(self):
+        self.is_visible = True
+        Renderer.add_widget(self, layer=self.group)
+
+    def hide(self):
+        self.is_visible = False
+        Renderer.del_widget(self)
 
 
 EventHandler.register(lambda e: Node(e.data), 'AddNode')

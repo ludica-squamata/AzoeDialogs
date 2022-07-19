@@ -1,4 +1,4 @@
-from frontend.globals import WIDTH, HEIGHT
+from frontend.globals import WIDTH, HEIGHT, NODOS_DIALOGO, NODOS_BEHAVIOUR
 from .eventhandler import EventHandler
 from os import getcwd, path, mkdir
 from pygame import Color, Rect
@@ -9,7 +9,8 @@ from random import randint
 class System:
     data = {}
     lenght = 0
-    number_of_nodes = 0
+    number_of_dialog_nodes = 0
+    number_of_behaviour_nodes = 0
     generated_colors = []
 
     type_mode = False
@@ -18,6 +19,9 @@ class System:
 
     limit_input = True
     replacing_locutor = False
+
+    program_mode = 'dialog'
+    widget_group_key = NODOS_DIALOGO
 
     @classmethod
     def init(cls):
@@ -31,15 +35,27 @@ class System:
 
     @classmethod
     def toggle_input_mode(cls):
-        cls.limit_input = not cls.limit_input
+        if cls.program_mode == 'dialog':
+            cls.limit_input = not cls.limit_input
+
+    @classmethod
+    def toggle_program_mode(cls):
+        if cls.program_mode == 'dialog':
+            cls.program_mode = 'behaviour'
+            cls.limit_input = False
+            cls.widget_group_key = NODOS_BEHAVIOUR
+
+        elif cls.program_mode == 'behaviour':
+            cls.program_mode = 'dialog'
+            cls.widget_group_key = NODOS_DIALOGO
 
     @classmethod
     def get_lenght(cls):
-        return len(cls.data) - cls.number_of_nodes
+        return len(cls.data) - cls.number_of_dialog_nodes
 
     @classmethod
     def get_extra(cls):
-        return cls.number_of_nodes - len(cls.data)
+        return cls.number_of_dialog_nodes - len(cls.data)
 
     @classmethod
     def load_data(cls):

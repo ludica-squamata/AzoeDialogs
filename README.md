@@ -1,5 +1,6 @@
-# AzoeDialogs v 1.5.0
+# Azoe Integration v2.0.0
 Un editor/creador de árboles de diálogo para el proyecto AzoeEngine.
+Y ahora también un editor de árboles de comportamiento!
 
 
 **Acciones de teclado**
@@ -7,13 +8,14 @@ Un editor/creador de árboles de diálogo para el proyecto AzoeEngine.
  - "c": crea una conexión entre dos nodos seleccionados. 
  - "shft+c": elimina la conexión entre los nodos seleccionados.
  - "a": crea un punto intermedio entre dos elementos seleccionados adyacentes.
- - "d": con un locutor y nodos seleccionados, establece ese locutor para esos nodos.
- - "suprimir": borra todos los objetos seleccionados. Reemplaza colores en el panel de locutores.
- - "enter": crea un archivo "output.json" con la estructura del árbol.
- - "F1": recarga el archivo input.json y borra los nodos en exceso.
- - "F2": crea un nuevo color para representar un locutor.
- - "F3": habilita la edición del texto del nodo, o el nombre del locutor seleccionado.
- - "F5": alterna entre los modos, permitiendo que se añadan nuevos por encima del limite del diálogo.
+ - "d": con un locutor (en modo diálogo) o un tipo estructural (en modo de comportamiento) y  nodos seleccionados, establece ese locutor o tipo para esos nodos.
+ - "suprimir": borra todos los objetos seleccionados. Reemplaza colores en el panel de locutores (modo diálogo).
+ - "enter": crea un archivo "output.json" con la estructura del árbol (modo diálogo).
+ - "F1": recarga el archivo input.json y borra los nodos en exceso (modo diálogo).
+ - "F2": crea un nuevo color para representar un locutor (modo diálogo).
+ - "F3": habilita la edición del texto del nodo, o (en modo diálogo) el nombre del locutor seleccionado.
+ - "F4": alterna entre el modo de edición de diálogos y el modo de edición de árboles de comportamiento.
+ - "F5": levanta la resticción, permitiendo que se añadan nuevos por encima del limite del diálogo.
  - "escape": cierra el programa.
 
 **Acciones con el mouse**

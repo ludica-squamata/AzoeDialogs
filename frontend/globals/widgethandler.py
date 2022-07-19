@@ -1,5 +1,5 @@
 from pygame import event, KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP, MOUSEMOTION, QUIT, K_ESCAPE, key, mouse
-from pygame import KMOD_CTRL, KMOD_SHIFT, K_RETURN, K_F1, K_s, K_d, K_c, K_a, K_F2, K_F3, K_F5, Rect
+from pygame import KMOD_CTRL, KMOD_SHIFT, K_RETURN, K_F1, K_s, K_d, K_c, K_a, K_F2, K_F3, K_F4, K_F5, Rect
 from backend import salir, EventHandler, System, Selected
 from backend.group import WidgetGroup
 
@@ -15,20 +15,31 @@ class WidgetHandler:
     active_area = Rect(0, 21, 537, 363)
 
     @classmethod
-    def add_widget(cls, widget):
-        cls.widgets.add(widget)
+    def add_widget(cls, widget, layer=0):
+        cls.widgets.add(widget, layer=layer)
         if widget.numerable:
             cls.numerable.append(widget)
-            System.number_of_nodes += 1
+            if System.widget_group_key == 1:
+                System.number_of_dialog_nodes += 1
+            elif System.widget_group_key == 2:
+                System.number_of_behaviour_nodes += 1
 
     @classmethod
     def del_widget(cls, widget):
         cls.widgets.remove(widget)
         if widget.numerable:
             cls.numerable.remove(widget)
-            System.number_of_nodes -= 1
+            if System.widget_group_key == 1:
+                System.number_of_dialog_nodes -= 1
+            elif System.widget_group_key == 2:
+                System.number_of_behaviour_nodes -= 1
 
         cls.numerable.sort(key=lambda o: o.idx)
+
+    @classmethod
+    def wids(cls):
+        # for oneliners
+        return cls.widgets.widgets()
 
     @classmethod
     def set_active(cls, widget):
@@ -81,7 +92,8 @@ class WidgetHandler:
                     EventHandler.trigger('AddMidPoint', 'System', {'base': base, 'other': other})
 
                 elif e.key == K_RETURN:
-                    EventHandler.trigger('CreateDialog', cls.name, {'nodes': cls.numerable})
+                    if System.program_mode == 'dialog':
+                        EventHandler.trigger('CreateDialog', cls.name, {'nodes': cls.numerable})
 
                 elif e.key == K_F1:
                     System.load_data()
@@ -90,7 +102,8 @@ class WidgetHandler:
                         cls.numerable[-1].kill()
 
                 elif e.key == K_F2:
-                    System.new_locutor()
+                    if System.program_mode == 'dialog':
+                        System.new_locutor()
 
                 elif e.key == K_F3:
                     if any([o.order == 'b' for o in widgets]):
@@ -99,23 +112,40 @@ class WidgetHandler:
                         for widget in widgets:
                             widget.on_keydown(e)
 
+                elif e.key == K_F4:
+                    System.toggle_program_mode()
+                    EventHandler.trigger('F4ToggleMode', 'ENGINE', {'mode': System.program_mode})
+                    cls.selected.empty()
+
+                elif e.key == K_F5:
+                    System.toggle_input_mode()
+
                 elif e.key == K_s and (System.get_lenght() > 0 or System.limit_input is False):
                     x, y = mouse.get_pos()
                     color = None
+                    identifier = None
+                    text = None
+
                     if any([o.order == 'a' for o in widgets]):
-                        color = [i for i in widgets if i.order == 'a'][0].color
+                        identifier = 'a'
+
+                    elif any([o.order == 'd' for o in widgets]):
+                        identifier = 'd'
+
+                    if identifier is not None:
+                        node = [i for i in widgets if i.order == identifier][0]
+                        color = node.color
+                        if hasattr(node, 'text'):
+                            text = node.text
 
                     if System.area_nodos.collidepoint(x, y):
-                        EventHandler.trigger('AddNode', cls.name, {'pos': [x, y], 'color': color})
+                        EventHandler.trigger('AddNode', cls.name, {'pos': [x, y], 'color': color, 'text': text})
 
                 elif e.key == K_d and any([o.order == 'a' for o in widgets]):
                     widgets.sort(key=lambda o: o.order)
                     color_namer = widgets.pop(0)
                     for other in widgets:
                         other.colorize(color_namer)
-
-                elif e.key == K_F5:
-                    System.toggle_input_mode()
 
                 elif len(cls.selected):
                     for widget in cls.selected.widgets():
@@ -127,7 +157,7 @@ class WidgetHandler:
                         widget.on_keyup(e)
 
             elif e.type == MOUSEBUTTONDOWN:  # pos, button
-                widgets = [w for w in cls.widgets.widgets() if w.selectable and w.rect.collidepoint(e.pos)]
+                widgets = [w for w in cls.wids() if w.selectable and w.rect.collidepoint(e.pos) and w.is_visible]
                 if not len(widgets) and e.button == 1 and cls.active_area.collidepoint(e.pos):
                     if not shift and not System.type_mode:
                         cls.selected.empty()

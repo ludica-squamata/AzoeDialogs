@@ -30,5 +30,8 @@ class SelectionBox(BaseWidget):
     def __repr__(self):
         return 'Selection Object @{},{},{},{}'.format(*self.rect)
 
+    def toggle(self, event):
+        pass
+
 
 EventHandler.register(lambda e: SelectionBox(e), 'AddSelection')

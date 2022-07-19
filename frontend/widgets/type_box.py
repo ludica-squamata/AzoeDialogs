@@ -372,6 +372,9 @@ class TypeBox(BaseWidget):
     def __repr__(self):
         return 'TypeBox ' + self.name
 
+    def toggle(self, event):
+        pass
+
 
 EventHandler.register(lambda e: TypeBox(None, 0, HEIGHT, WIDTH, HEIGHT // 5, 16, 'MainTB'), 'Init')
 
@@ -475,3 +478,6 @@ class Cursor(BaseWidget):
             Renderer.del_widget(self)
         else:
             Renderer.add_widget(self)
+
+    def toggle(self, event):
+        pass

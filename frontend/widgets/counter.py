@@ -1,4 +1,4 @@
-from frontend.globals import COLOR_TEXT, COLOR_BG, WidgetHandler, Renderer
+from frontend.globals import COLOR_TEXT, COLOR_BG
 from .basewidget import BaseWidget
 from backend import System, EventHandler
 from pygame import font
@@ -10,8 +10,7 @@ class Counter(BaseWidget):
         super().__init__()
         self.f = font.SysFont('Verdana', 15)
         self.update()
-        WidgetHandler.add_widget(self)
-        Renderer.add_widget(self)
+        self.show()
 
     @staticmethod
     def get_text():
@@ -31,7 +30,7 @@ class Counter(BaseWidget):
                     t += ' (1 adicional)'
 
         else:
-            cant = System.number_of_nodes
+            cant = System.number_of_dialog_nodes
             if cant == 1:
                 t = 'Hay 1 nodo'
             elif cant == 0:

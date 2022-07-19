@@ -65,7 +65,8 @@ def render_textrect(string, font, rect, text_color, background_color, justificat
     # Let's try to write the text out on the surface.
 
     surface = Surface(rect.size)
-    surface.fill(background_color)
+    if background_color is not None:
+        surface.fill(background_color)
 
     accumulated_height = 0
     for line in final_lines:

@@ -5,3 +5,4 @@ from .counter import Counter
 from .preview import Preview
 from .locutors import LocutorsPanel
 from .type_box import TypeBox
+from .structural_nodes import StructureNodes

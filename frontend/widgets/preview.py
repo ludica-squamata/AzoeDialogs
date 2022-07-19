@@ -1,4 +1,5 @@
-from frontend.globals import WidgetHandler, Renderer, COLOR_BOX, COLOR_TEXT, WIDTH, HEIGHT
+from frontend.globals.constants import COLOR_BOX, COLOR_TEXT, WIDTH, HEIGHT, NODOS_DIALOGO, NODOS_BEHAVIOUR
+from frontend.globals import WidgetHandler, Renderer
 from backend import System, render_textrect, EventHandler
 from .basewidget import BaseWidget
 from pygame import font, Surface
@@ -29,6 +30,8 @@ class Preview(BaseWidget):
     def get_selected():
         s = [o for o in WidgetHandler.selected.widgets() if o.numerable]
         c = [d for d in WidgetHandler.selected.widgets() if d.order == 'a']
+        d = [d for d in WidgetHandler.selected.widgets() if d.order == 'd']
+
         t = ''
         if len(s) and len(c):
             ss = 's' if len(s) > 1 else ''
@@ -37,17 +40,22 @@ class Preview(BaseWidget):
             t += ' Presione D para vincular al locutor con {} nodo{}.'.format(elos, ss)
         elif len(c) == 1 or System.replacing_locutor:
             t = 'Presione F3 para editar el nombre del locutor seleccionado, o SUPR para cambiar su color.'
+        elif len(d) == 1:
+            t = 'Presione S para crear nodos del tipo seleccionado.'
         elif len(s) == 1:
             idx = s[0].idx
-            if 0 <= idx < len(System.data):
-                n = System.data[idx]
-            else:
-                n = ''
+            if s[0].group == NODOS_DIALOGO:
+                if 0 <= idx < len(System.data):
+                    n = System.data[idx]
+                else:
+                    n = ''
 
-            if not s[0].named:
-                t = '"' + n + '"'
-            else:
-                t = s[0].locutor_name+': "' + n + '"'
+                if not s[0].named:
+                    t = '"' + n + '"'
+                else:
+                    t = s[0].locutor_name+': "' + n + '"'
+            elif s[0].group == NODOS_BEHAVIOUR:
+                t = s[0].text
 
         elif len(s) == 2:
             t = 'Dos nodos están seleccionados. Presione C para crear una conexión entre ellos,'
@@ -69,6 +77,9 @@ class Preview(BaseWidget):
         r = render_textrect(text, self.f, self.rect.inflate(-3, -3), COLOR_TEXT, COLOR_BOX)
         self.image.fill(COLOR_BOX)
         self.image.blit(r, (3, 3))
+
+    def toggle(self, event):
+        pass
 
 
 EventHandler.register(lambda e: Preview(), 'Init')

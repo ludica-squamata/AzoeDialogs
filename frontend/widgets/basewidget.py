@@ -1,3 +1,5 @@
+from frontend.globals import WidgetHandler, Renderer
+from backend.eventhandler import EventHandler
 from pygame.sprite import Sprite
 from pygame import K_DELETE
 
@@ -12,6 +14,8 @@ class BaseWidget(Sprite):
     draggable = True
     order = None
 
+    is_visible = True
+
     def __init__(self, parent=None):
         self.parent = parent
         super().__init__()
@@ -19,6 +23,7 @@ class BaseWidget(Sprite):
             self.layer = self.parent.layer + 1
         else:
             self.layer = 1
+        EventHandler.register(self.toggle, 'F4ToggleMode')
 
     @property
     def center(self):
@@ -59,3 +64,19 @@ class BaseWidget(Sprite):
 
     def deselect(self):
         self.is_selected = False
+
+    def toggle(self, event):
+        if event.data['mode'] == 'dialog':
+            self.show()
+        elif event.data['mode'] == 'behaviour':
+            self.hide()
+
+    def show(self):
+        self.is_visible = True
+        WidgetHandler.add_widget(self)
+        Renderer.add_widget(self)
+
+    def hide(self):
+        self.is_visible = False
+        WidgetHandler.del_widget(self)
+        Renderer.del_widget(self)
