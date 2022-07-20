@@ -4,3 +4,4 @@ from .system import System
 from .Selected import Selected
 from .textrect import render_textrect
 from .dialog import Dialog
+from .behaviour import Behaviour

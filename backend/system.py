@@ -59,8 +59,13 @@ class System:
 
     @classmethod
     def load_data(cls):
-        if path.exists(path.join(getcwd(), 'data', 'input.json')):
-            cls.data = abrir_json('data/input.json')
+        if cls.program_mode == 'dialog':
+            name = 'input'
+        else:
+            name = 'input2'
+
+        if path.exists(path.join(getcwd(), 'data', f'{name}.json')):
+            cls.data = abrir_json('data/'+f'{name}.json')
             cls.lenght = len(cls.data)
 
     @classmethod

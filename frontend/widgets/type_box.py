@@ -61,12 +61,23 @@ class TypeBox(BaseWidget):
                 self.cursor.switch(False)
 
     def return_text(self):
-        s = [o for o in WidgetHandler.selected.sprites() if o.numerable]
+        if self.get_selected_obj().group == 1:
+            s = [o for o in WidgetHandler.selected.sprites() if o.numerable]
+            what_to_do = 'WriteNode'
+        else:
+            s = [o for o in WidgetHandler.behaviour_nodes]
+            what_to_do = None
+
         if len(s) == 1 and any([len(line) for line in self.lines]):
             idx = s[0].idx
-            text = '\n'.join([''.join(line) for line in self.lines])
-            EventHandler.trigger('WriteNode', self, {'idx': idx, 'text': text})
-            self.clear()
+            text = ''
+            for line in self.lines:
+                str_line = [str(char) for char in line]
+                text += ''.join(str_line)
+            # text = '\n'.join([''.join(str(char)) for char in self.lines])
+            if what_to_do is not None:
+                EventHandler.trigger(what_to_do, self, {'idx': idx, 'text': text})
+                self.clear()
 
     def on_mousedown(self, event):
         pos = event.pos
@@ -189,7 +200,11 @@ class TypeBox(BaseWidget):
             self.cursor.place(self.char_x - 1, self.char_y)
 
         elif tecla in (K_RETURN, K_KP_ENTER):
-            if self.name == 'MainTB':
+            obj = self.get_selected_obj()
+            if obj is not None:
+                obj.text = ''.join([i.char for i in self.lines[self.current_line]])
+                System.toggle_typemode('MainTB')
+            elif self.name == 'MainTB':
                 self.typed(event)
             else:
                 text = ''.join([i.char for i in self.lines[self.current_line]])
@@ -316,7 +331,7 @@ class TypeBox(BaseWidget):
             if self.cursor_at_left:
                 char = self.lines[self.current_line][self.cursor_pos]
             else:
-                char = self.lines[self.current_line][self.cursor_pos+1]
+                char = self.lines[self.current_line][self.cursor_pos + 1]
                 self.cursor_pos += 1
 
         if char is not None:
@@ -345,25 +360,35 @@ class TypeBox(BaseWidget):
         self.lines = [[]]
         self.char_x = self.x
         self.char_y = self.y
+        self.cursor_pos = 0
         self.cursor.kill()
         self.written = False
 
     @staticmethod
-    def get_selected():
+    def get_selected_text():
         s = [o for o in WidgetHandler.selected.widgets() if o.editable]
         text = ''
         if len(s) > 0 and hasattr(s[0], 'idx'):
             idx = s[0].idx
-            if 0 <= idx < len(System.data):
+            if s[0].group == 2:
+                text = s[0].text
+            elif 0 <= idx < len(System.data):
                 text = System.data[idx]
         elif len(s) > 0 and hasattr(s[0], 'name'):
             text = s[0].name
 
         return text
 
+    @staticmethod
+    def get_selected_obj():
+        s = [o for o in WidgetHandler.selected.widgets() if o.editable]
+        if len(s) > 0 and hasattr(s[0], 'idx'):
+            if s[0].group == 2:
+                return s[0]
+
     def update(self):
         self.image.fill(COLOR_BOX)
-        text = self.get_selected()
+        text = self.get_selected_text()
         if text and not self.written:
             for char in text:
                 self.input_character(char)

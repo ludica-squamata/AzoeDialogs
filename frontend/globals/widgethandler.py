@@ -1,5 +1,5 @@
 from pygame import event, KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP, MOUSEMOTION, QUIT, K_ESCAPE, key, mouse
-from pygame import KMOD_CTRL, KMOD_SHIFT, K_RETURN, K_F1, K_s, K_d, K_c, K_a, K_F2, K_F3, K_F4, K_F5, Rect
+from pygame import KMOD_CTRL, KMOD_SHIFT, K_RETURN, K_F1, K_s, K_d, K_c, K_a, K_F2, K_F3, K_F4, K_F5, Rect, Color
 from backend import salir, EventHandler, System, Selected
 from backend.group import WidgetGroup
 
@@ -14,6 +14,11 @@ class WidgetHandler:
     numerable = []
     active_area = Rect(0, 21, 537, 363)
 
+    dialog_nodes = []
+    behaviour_nodes = []
+
+    toggle_automatic_connection = False
+
     @classmethod
     def add_widget(cls, widget, layer=0):
         cls.widgets.add(widget, layer=layer)
@@ -21,8 +26,10 @@ class WidgetHandler:
             cls.numerable.append(widget)
             if System.widget_group_key == 1:
                 System.number_of_dialog_nodes += 1
+                cls.dialog_nodes.append(widget)
             elif System.widget_group_key == 2:
                 System.number_of_behaviour_nodes += 1
+                cls.behaviour_nodes.append(widget)
 
     @classmethod
     def del_widget(cls, widget):
@@ -31,8 +38,10 @@ class WidgetHandler:
             cls.numerable.remove(widget)
             if System.widget_group_key == 1:
                 System.number_of_dialog_nodes -= 1
+                cls.dialog_nodes.remove(widget)
             elif System.widget_group_key == 2:
                 System.number_of_behaviour_nodes -= 1
+                cls.behaviour_nodes.remove(widget)
 
         cls.numerable.sort(key=lambda o: o.idx)
 
@@ -57,12 +66,45 @@ class WidgetHandler:
         cls.on_selection = evento.data['value']
 
     @classmethod
+    def add_conections(cls):
+
+        ordered_nodes = []
+        unordererd_idexes = [int(i.idx) for i in cls.behaviour_nodes]
+        for i in range(len(cls.behaviour_nodes)):
+            if i in unordererd_idexes:
+                idx = unordererd_idexes.index(i)
+                ordered_nodes.append(cls.behaviour_nodes[idx])
+        for node in reversed(ordered_nodes):
+            node_data = System.data['body'][str(node)]
+            if 'child' in node_data:
+                child_node = ordered_nodes[node_data['child']]
+                node.connect(child_node)
+                node.rect.x = child_node.rect.x
+
+            elif 'children' in node_data:
+                children = [n for n in ordered_nodes if int(n.idx) in node_data['children']]
+                children.sort(key=lambda c: int(c.idx))
+                # previous_child = None
+                # node.rect.x = sum([ch.rect.x for ch in children])/len(children)
+                for child_node in children:
+                    node.connect(child_node)
+                    # if previous_child is not None:
+                    #     child_node.rect.y = previous_child.rect.y
+                    # else:
+                    #     previous_child = child_node
+
+        cls.toggle_automatic_connection = False
+
+    @classmethod
     def update(cls):
         events = event.get([KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP, MOUSEMOTION, QUIT])
         event.clear()
 
         # esto es para que se pueda reemplazar un locutor sin tener que reseleccionarlo.
         cls.selected.add([i for i in cls.widgets.widgets() if i.is_selected and (i not in cls.selected)])
+
+        if cls.toggle_automatic_connection:
+            cls.add_conections()
 
         for e in events:
             mods = key.get_mods()
@@ -93,13 +135,42 @@ class WidgetHandler:
 
                 elif e.key == K_RETURN:
                     if System.program_mode == 'dialog':
-                        EventHandler.trigger('CreateDialog', cls.name, {'nodes': cls.numerable})
+                        EventHandler.trigger('CreateDialog', cls.name, {'nodes': cls.dialog_nodes})
+
+                    elif System.program_mode == 'behaviour':
+                        EventHandler.trigger('CreateAI', cls.name, {'nodes': cls.behaviour_nodes})
 
                 elif e.key == K_F1:
-                    System.load_data()
-                    diff = len(cls.numerable) - System.lenght
-                    for i in range(diff):
-                        cls.numerable[-1].kill()
+                    if System.program_mode == 'dialog':
+                        System.load_data()
+                        diff = len(cls.numerable) - System.lenght
+                        for i in range(diff):
+                            cls.numerable[-1].kill()
+
+                    elif System.program_mode == 'behaviour':
+                        System.load_data()
+                        structural_nodes = [n for n in cls.wids() if n.order == 'd']
+                        structural_names = [n.name for n in structural_nodes]
+                        x = cls.active_area.centerx
+                        y = cls.active_area.y
+                        for idx in sorted(System.data['body']):
+                            node_data = System.data['body'][idx]
+                            text = node_data['name']
+                            if text in structural_names:
+                                index = structural_names.index(text)
+                                color = structural_nodes[index].color
+                            else:
+                                color = Color(0, 0, 0)
+
+                            EventHandler.trigger('AddNode', cls.name, {'idx': idx, 'pos': [x, y],
+                                                                       'color': color, 'text': text})
+
+                            if 'child' in node_data or 'children' in node_data:
+                                y += 32
+                                x = cls.active_area.centerx
+                            else:
+                                x += 32
+                        cls.toggle_automatic_connection = True
 
                 elif e.key == K_F2:
                     if System.program_mode == 'dialog':
@@ -118,7 +189,8 @@ class WidgetHandler:
                     cls.selected.empty()
 
                 elif e.key == K_F5:
-                    System.toggle_input_mode()
+                    if System.program_mode == 'dialog':
+                        System.toggle_input_mode()
 
                 elif e.key == K_s and (System.get_lenght() > 0 or System.limit_input is False):
                     x, y = mouse.get_pos()

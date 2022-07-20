@@ -24,6 +24,8 @@ class Node(BaseWidget):
     selectable = True
     editable = True
 
+    id_overritten = False
+
     def __init__(self, data):
         super().__init__()
         self.connections = []
@@ -36,6 +38,10 @@ class Node(BaseWidget):
         if data['color'] is not None:
             self.colorize(data['color'])
             self.text = data['text']
+        if 'idx' in data:
+            self.idx = data['idx']
+            self.id_overritten = True
+            self.real_idx = data['idx']
 
         self.rect = self.image.get_rect(center=data['pos'])
         EventHandler.register(self.toggle_selection, 'select', 'deselect')
@@ -60,13 +66,14 @@ class Node(BaseWidget):
             self.connections.remove(other)
 
     def get_idx(self):
-        g = System.widget_group_key
-        sprites = WidgetHandler.widgets.get_widgets_from_layer(g)
-        numerables = [w for w in sprites if w.numerable]
-        if self in numerables:
-            return numerables.index(self)
-        else:
-            return self.idx
+        if not self.id_overritten:
+            g = System.widget_group_key
+            sprites = WidgetHandler.widgets.get_widgets_from_layer(g)
+            numerables = [w for w in sprites if w.numerable]
+            if self in numerables:
+                return numerables.index(self)
+
+        return self.idx
 
     def colorize(self, color_namer):
         a = color_namer.color if hasattr(color_namer, 'color') else color_namer
