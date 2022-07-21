@@ -74,7 +74,7 @@ class Preview(BaseWidget):
 
     def update(self):
         text = self.get_selected()
-        r = render_textrect(text, self.f, self.rect.inflate(-3, -3), COLOR_TEXT, COLOR_BOX)
+        r = render_textrect(text, self.f, *self.rect.inflate(-3, -3).size, COLOR_TEXT, COLOR_BOX)
         self.image.fill(COLOR_BOX)
         self.image.blit(r, (3, 3))
 

@@ -1,6 +1,7 @@
 from frontend.globals.constants import WIDTH, HEIGHT, COLOR_BOX, COLOR_TEXT, COLOR_SELECTED
 from backend.util import abrir_json, navigate
 from backend.eventhandler import EventHandler
+from backend.textrect import render_textrect
 from backend.group import WidgetGroup
 from os import listdir, path, remove
 from .basewidget import BaseWidget
@@ -25,8 +26,8 @@ class LoadWindow(BaseWidget):
         self.properties = WidgetGroup()
         self.show_files(self.mode)
 
-        self.button_new = NewButton(self, top=self.rect.top+1, right=self.rect.right-3)
-        self.button_del = DeleteButton(self, top=self.button_new.rect.bottom+1, right=self.rect.right-3)
+        self.button_new = NewButton(self, top=self.rect.top + 1, right=self.rect.right - 3)
+        self.button_del = DeleteButton(self, top=self.button_new.rect.bottom + 1, right=self.rect.right - 3)
 
         EventHandler.register(self.toggle, 'LoadData')
         EventHandler.deregister(self.toggle, 'F4ToggleMode')
@@ -45,7 +46,7 @@ class LoadWindow(BaseWidget):
         for i, file in enumerate(files):
             filename = join(ruta, file)
             x = self.rect.x + 2
-            y = i * 21 + self.rect.y + self._r.bottom
+            y = i * 20 + self.rect.y + self._r.bottom
             row = Row(self, file[:-5].capitalize(), filename, x, y)
             self.properties.add(row, layer=1)
 
@@ -115,13 +116,13 @@ class BaseRowButton(BaseWidget):
 
     selectable = True
 
-    def __init__(self, parent, text):
+    def __init__(self, parent, text, w, h=19):
         super().__init__(parent)
         f1 = font.SysFont('Verdana', 14)
 
         self.text = text
-        self.img_uns = f1.render(text, 1, COLOR_TEXT, COLOR_BOX)
-        self.img_sel = f1.render(text, 1, COLOR_SELECTED, COLOR_BOX)
+        self.img_uns = render_textrect(text, f1, w, h, COLOR_TEXT, COLOR_BOX)
+        self.img_sel = render_textrect(text, f1, w, h, COLOR_SELECTED, COLOR_BOX)
         self.image = self.img_uns
 
     def select(self):
@@ -148,7 +149,7 @@ class Row(BaseRowButton):
     selectable = True
 
     def __init__(self, parent, text, ruta, x, y):
-        super().__init__(parent, text)
+        super().__init__(parent, text, 240)
         self.rect = self.image.get_rect(topleft=(x, y))
         self.filepath = ruta
         EventHandler.register(self.load_file, 'LoadDataFile')
@@ -179,7 +180,7 @@ EventHandler.register(lambda a: LoadWindow(), 'Init')
 
 class NewButton(BaseRowButton):
     def __init__(self, parent, **kwargs):
-        super().__init__(parent, '+ New')
+        super().__init__(parent, '+ New', 47)
         self.rect = self.image.get_rect(**kwargs)
 
     def on_mousebuttondown(self, event):
@@ -192,7 +193,7 @@ class NewButton(BaseRowButton):
 
 class DeleteButton(BaseRowButton):
     def __init__(self, parent, **kwargs):
-        super().__init__(parent, '- Remove')
+        super().__init__(parent, '- Remove', 70)
         self.rect = self.image.get_rect(**kwargs)
         self.select()
 

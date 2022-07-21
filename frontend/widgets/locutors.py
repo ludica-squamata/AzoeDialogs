@@ -28,7 +28,7 @@ class LocutorsPanel(SideBox):
         self.image.blit(render, renderect)
 
         t = 'Presione F2 para crear un nuevo locutor.'
-        exp = render_textrect(t, self.fb, self.rect, COLOR_TEXT, COLOR_BOX, 1)
+        exp = render_textrect(t, self.fb, self.rect.w, self.rect.h, COLOR_TEXT, COLOR_BOX, 1)
         rendexp = exp.get_rect(centerx=self.rect.width // 2, top=30)
         self.image.blit(exp, rendexp)
         self.empty = True

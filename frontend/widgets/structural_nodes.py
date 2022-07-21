@@ -67,8 +67,8 @@ class StandardNode(BaseWidget):
             self.color = COLOR_TEXT
         self.f = font.SysFont('Verdana', 13)
         self.rect = r = Rect(parent.rect.x, y, parent.rect.w, 21)
-        self.img_uns = render_textrect(self.name, self.f, r, COLOR_TEXT, bg, 1)
-        self.img_sel = render_textrect(self.name, self.f, r, COLOR_SELECTED, bg, 1)
+        self.img_uns = render_textrect(self.name, self.f, r.w, r.h, COLOR_TEXT, bg, 1)
+        self.img_sel = render_textrect(self.name, self.f, r.w, r.h, COLOR_SELECTED, bg, 1)
         self.image = self.img_uns
         EventHandler.register(self.toggle_selection, 'select', 'deselect')
 
