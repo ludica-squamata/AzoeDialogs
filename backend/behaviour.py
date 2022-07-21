@@ -1,5 +1,5 @@
+from backend.util import guardar_json, navigate, generate_id
 from .eventhandler import EventHandler
-from backend.util import guardar_json
 
 
 class Behaviour:
@@ -17,6 +17,14 @@ class Behaviour:
         }
 
         EventHandler.register(cls.save, 'CreateAI')
+        EventHandler.register(cls.new, 'CreateNew')
+
+    @classmethod
+    def new(cls, event):
+        if event.data['tipo'] == 'behaviours':
+            name = generate_id()
+            EventHandler.trigger('CreateAI', cls.name, {'name': name, 'nodes': []})
+            EventHandler.trigger('OnFileCreation', 'None', {'value': False})
 
     @classmethod
     def save(cls, event):
@@ -43,7 +51,8 @@ class Behaviour:
 
                 head[mod].append(nodes[str(node)]['name'])
 
-        guardar_json('data/output2.json', cls.tree)
+        ruta = navigate('behaviours')
+        guardar_json(ruta + '/' + event.data['name'] + '.json', cls.tree)
 
 
 Behaviour.init()

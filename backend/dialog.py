@@ -1,5 +1,5 @@
+from backend.util import guardar_json, navigate, generate_id
 from .eventhandler import EventHandler
-from backend.util import guardar_json
 from .system import System
 
 
@@ -27,6 +27,14 @@ class Dialog:
             'body': {}
         }
         EventHandler.register(cls.save, 'CreateDialog')
+        EventHandler.register(cls.new, 'CreateNew')
+
+    @classmethod
+    def new(cls, event):
+        if event.data['tipo'] == 'dialogs':
+            name = generate_id()
+            EventHandler.trigger('CreateDialog', cls.name, {'name': name, 'nodes': []})
+            EventHandler.trigger('OnFileCreation', 'None', {'value': False})
 
     @classmethod
     def save(cls, event):
@@ -41,7 +49,9 @@ class Dialog:
             if node.locutor_name not in cls.tree['head']['locutors']:
                 cls.tree['head']['locutors'].append(node.locutor_name)
             nodes[str(node)]['to'] = node.interlocutor.locutor_name if node.interlocutor is not None else ''
-        guardar_json('data/output.json', cls.tree)
+
+        ruta = navigate('dialogs')
+        guardar_json(ruta+'/'+event.data['name']+'.json', cls.tree)
 
 
 Dialog.init()

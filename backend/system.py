@@ -1,8 +1,6 @@
 from frontend.globals import WIDTH, HEIGHT, NODOS_DIALOGO, NODOS_BEHAVIOUR
 from .eventhandler import EventHandler
-from os import getcwd, path, mkdir
 from pygame import Color, Rect
-from .util import abrir_json
 from random import randint
 
 
@@ -22,11 +20,6 @@ class System:
 
     program_mode = 'dialog'
     widget_group_key = NODOS_DIALOGO
-
-    @classmethod
-    def init(cls):
-        if path.exists(path.join(getcwd(), 'data', 'input.json')):
-            cls.load_data()
 
     @classmethod
     def toggle_typemode(cls, typebox):
@@ -69,17 +62,6 @@ class System:
         return cls.number_of_dialog_nodes - len(cls.data)
 
     @classmethod
-    def load_data(cls):
-        if cls.program_mode == 'dialog':
-            name = 'input'
-        else:
-            name = 'input2'
-
-        if path.exists(path.join(getcwd(), 'data', f'{name}.json')):
-            cls.data = abrir_json('data/'+f'{name}.json')
-            cls.lenght = len(cls.data)
-
-    @classmethod
     def load_file_data(cls, data, mode):
         cls.data = data
         cls.lenght = len(cls.data)
@@ -116,9 +98,3 @@ class System:
 
 
 EventHandler.register(lambda o: System.modify_data(o.data), 'WriteNode')
-
-ruta = path.join(getcwd(), 'data')
-if not path.exists(ruta):
-    mkdir(ruta)
-
-System.init()

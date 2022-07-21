@@ -21,6 +21,8 @@ class WidgetHandler:
 
     on_window = False
 
+    name_current = ''
+
     @classmethod
     def add_widget(cls, widget, layer=0):
         cls.widgets.add(widget, layer=layer)
@@ -74,6 +76,12 @@ class WidgetHandler:
         elif evento.data['mode'] == 'behaviour':
             cls.create_loaded_behaviour_nodes()
             cls.toggle_automatic_connection = True
+
+        cls.name_current = evento.data['name']
+
+    @classmethod
+    def on_file_creation(cls, evento):
+        cls.on_window = evento.data['value']
 
     @classmethod
     def add_conections(cls):
@@ -179,10 +187,12 @@ class WidgetHandler:
                         EventHandler.trigger('LoadDataFile', cls.name, {'selected': widgets[0]})
 
                     elif System.program_mode == 'dialog':
-                        EventHandler.trigger('CreateDialog', cls.name, {'nodes': cls.dialog_nodes})
+                        EventHandler.trigger('CreateDialog', cls.name, {'name': cls.name_current,
+                                                                        'nodes': cls.dialog_nodes})
 
                     elif System.program_mode == 'behaviour':
-                        EventHandler.trigger('CreateAI', cls.name, {'nodes': cls.behaviour_nodes})
+                        EventHandler.trigger('CreateAI', cls.name, {'name': cls.name_current,
+                                                                    'nodes': cls.behaviour_nodes})
 
                 elif e.key == K_F1:
                     EventHandler.trigger('LoadData', cls.name, {'value': True})
@@ -262,7 +272,7 @@ class WidgetHandler:
                     cls.selected.sumar(widgets)
 
                 if len(widgets):
-                    for widget in cls.selected.widgets():
+                    for widget in [w for w in cls.selected.widgets() if w.rect.collidepoint(e.pos)]:
                         if widget is not cls.selection:
                             widget.on_mousebuttondown(e)
 
@@ -316,3 +326,4 @@ class WidgetHandler:
 
 EventHandler.register(WidgetHandler.toggle_selection, 'AddSelection', 'EndSelection')
 EventHandler.register(WidgetHandler.trigger_node_creation, 'trigger_node_creation')
+EventHandler.register(WidgetHandler.on_file_creation, 'OnFileCreation')
