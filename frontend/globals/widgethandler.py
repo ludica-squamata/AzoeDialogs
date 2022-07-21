@@ -19,6 +19,8 @@ class WidgetHandler:
 
     toggle_automatic_connection = False
 
+    on_window = False
+
     @classmethod
     def add_widget(cls, widget, layer=0):
         cls.widgets.add(widget, layer=layer)
@@ -66,8 +68,15 @@ class WidgetHandler:
         cls.on_selection = evento.data['value']
 
     @classmethod
-    def add_conections(cls):
+    def trigger_node_creation(cls, evento):
+        if evento.data['mode'] == 'dialog':
+            cls.load_dialog_nodes()
+        elif evento.data['mode'] == 'behaviour':
+            cls.create_loaded_behaviour_nodes()
+            cls.toggle_automatic_connection = True
 
+    @classmethod
+    def add_conections(cls):
         ordered_nodes = []
         unordererd_idexes = [int(i.idx) for i in cls.behaviour_nodes]
         for i in range(len(cls.behaviour_nodes)):
@@ -79,21 +88,53 @@ class WidgetHandler:
             if 'child' in node_data:
                 child_node = ordered_nodes[node_data['child']]
                 node.connect(child_node)
-                node.rect.x = child_node.rect.x
 
             elif 'children' in node_data:
                 children = [n for n in ordered_nodes if int(n.idx) in node_data['children']]
                 children.sort(key=lambda c: int(c.idx))
-                # previous_child = None
-                # node.rect.x = sum([ch.rect.x for ch in children])/len(children)
                 for child_node in children:
                     node.connect(child_node)
-                    # if previous_child is not None:
-                    #     child_node.rect.y = previous_child.rect.y
-                    # else:
-                    #     previous_child = child_node
 
         cls.toggle_automatic_connection = False
+
+        members = {}
+        for node in ordered_nodes:
+            count = node.count_parents()
+            if count not in members:
+                members[count] = []
+            members[count].append(node)
+            dy = node.vertical_position
+            node.rect.centery = dy*32 + cls.active_area.y
+
+        for count in members:
+            mms = members[count]
+            for i, node in enumerate(mms):
+                node.rect.centerx += i*32
+
+        cls.on_window = False
+
+    @classmethod
+    def create_loaded_behaviour_nodes(cls):
+        structural_nodes = [n for n in cls.wids() if n.order == 'd']
+        structural_names = [n.name for n in structural_nodes]
+        x = cls.active_area.centerx
+        y = cls.active_area.y
+        for idx in sorted(System.data['body']):
+            node_data = System.data['body'][idx]
+            text = node_data['name']
+            if text in structural_names:
+                index = structural_names.index(text)
+                color = structural_nodes[index].color
+            else:
+                color = Color(0, 0, 0)
+
+            EventHandler.trigger('AddNode', cls.name, {'idx': idx, 'pos': [x, y], 'color': color, 'text': text})
+
+    @classmethod
+    def load_dialog_nodes(cls):
+        diff = len(cls.numerable) - System.lenght
+        for i in range(diff):
+            cls.numerable[-1].kill()
 
     @classmethod
     def update(cls):
@@ -134,43 +175,18 @@ class WidgetHandler:
                     EventHandler.trigger('AddMidPoint', 'System', {'base': base, 'other': other})
 
                 elif e.key == K_RETURN:
-                    if System.program_mode == 'dialog':
+                    if cls.on_window:
+                        EventHandler.trigger('LoadDataFile', cls.name, {'selected': widgets[0]})
+
+                    elif System.program_mode == 'dialog':
                         EventHandler.trigger('CreateDialog', cls.name, {'nodes': cls.dialog_nodes})
 
                     elif System.program_mode == 'behaviour':
                         EventHandler.trigger('CreateAI', cls.name, {'nodes': cls.behaviour_nodes})
 
                 elif e.key == K_F1:
-                    if System.program_mode == 'dialog':
-                        System.load_data()
-                        diff = len(cls.numerable) - System.lenght
-                        for i in range(diff):
-                            cls.numerable[-1].kill()
-
-                    elif System.program_mode == 'behaviour':
-                        System.load_data()
-                        structural_nodes = [n for n in cls.wids() if n.order == 'd']
-                        structural_names = [n.name for n in structural_nodes]
-                        x = cls.active_area.centerx
-                        y = cls.active_area.y
-                        for idx in sorted(System.data['body']):
-                            node_data = System.data['body'][idx]
-                            text = node_data['name']
-                            if text in structural_names:
-                                index = structural_names.index(text)
-                                color = structural_nodes[index].color
-                            else:
-                                color = Color(0, 0, 0)
-
-                            EventHandler.trigger('AddNode', cls.name, {'idx': idx, 'pos': [x, y],
-                                                                       'color': color, 'text': text})
-
-                            if 'child' in node_data or 'children' in node_data:
-                                y += 32
-                                x = cls.active_area.centerx
-                            else:
-                                x += 32
-                        cls.toggle_automatic_connection = True
+                    EventHandler.trigger('LoadData', cls.name, {'value': True})
+                    cls.on_window = True
 
                 elif e.key == K_F2:
                     if System.program_mode == 'dialog':
@@ -233,7 +249,7 @@ class WidgetHandler:
                 if not len(widgets) and e.button == 1 and cls.active_area.collidepoint(e.pos):
                     if not shift and not System.type_mode:
                         cls.selected.empty()
-                    if not ctrl:
+                    if not ctrl and not cls.on_window:
                         EventHandler.trigger('AddSelection', cls.name, {"pos": e.pos, 'value': True})
 
                 elif len(widgets) and not len(cls.selected):
@@ -248,7 +264,7 @@ class WidgetHandler:
                 if len(widgets):
                     for widget in cls.selected.widgets():
                         if widget is not cls.selection:
-                            widget.on_mousedown(e)
+                            widget.on_mousebuttondown(e)
 
                 elif e.button != 1:
                     widgets = [w for w in cls.widgets.widgets() if w.numerable]
@@ -273,7 +289,7 @@ class WidgetHandler:
 
             elif e.type == MOUSEBUTTONUP:  # pos, button
                 if cls.on_selection and e.button == 1:
-                    cls.selection.on_mouseup(e)
+                    cls.selection.on_mousebuttonup(e)
                     cls.selection.rect.normalize()
                     selected = [i for i in cls.widgets if cls.selection.rect.contains(i.rect)]
                     cls.selected.sumar(selected)
@@ -299,3 +315,4 @@ class WidgetHandler:
 
 
 EventHandler.register(WidgetHandler.toggle_selection, 'AddSelection', 'EndSelection')
+EventHandler.register(WidgetHandler.trigger_node_creation, 'trigger_node_creation')

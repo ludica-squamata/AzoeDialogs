@@ -79,7 +79,7 @@ class TypeBox(BaseWidget):
                 EventHandler.trigger(what_to_do, self, {'idx': idx, 'text': text})
                 self.clear()
 
-    def on_mousedown(self, event):
+    def on_mousebuttondown(self, event):
         pos = event.pos
         flat_list = [item for sublist in self.lines for item in sublist]
         for char in flat_list:

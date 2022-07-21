@@ -50,6 +50,17 @@ class System:
             cls.widget_group_key = NODOS_DIALOGO
 
     @classmethod
+    def set_program_mode(cls, mode):
+        if mode == 'dialog':
+            cls.program_mode = 'dialog'
+            cls.widget_group_key = NODOS_DIALOGO
+
+        elif mode == 'behaviour':
+            cls.program_mode = 'behaviour'
+            cls.limit_input = False
+            cls.widget_group_key = NODOS_BEHAVIOUR
+
+    @classmethod
     def get_lenght(cls):
         return len(cls.data) - cls.number_of_dialog_nodes
 
@@ -67,6 +78,13 @@ class System:
         if path.exists(path.join(getcwd(), 'data', f'{name}.json')):
             cls.data = abrir_json('data/'+f'{name}.json')
             cls.lenght = len(cls.data)
+
+    @classmethod
+    def load_file_data(cls, data, mode):
+        cls.data = data
+        cls.lenght = len(cls.data)
+        cls.set_program_mode(mode)
+        EventHandler.trigger('F4ToggleMode', 'ENGINE', {'mode': cls.program_mode})
 
     @classmethod
     def generate_color(cls):

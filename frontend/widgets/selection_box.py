@@ -21,7 +21,7 @@ class SelectionBox(BaseWidget):
             self.rect.w += px
             self.rect.h += py
 
-    def on_mouseup(self, event):
+    def on_mousebuttonup(self, event):
         self.rect.normalize()
         EventHandler.trigger('EndSelection', 'SelectionObject', {'value': False})
         Renderer.del_widget(self)

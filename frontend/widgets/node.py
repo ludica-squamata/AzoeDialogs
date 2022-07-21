@@ -26,6 +26,9 @@ class Node(BaseWidget):
 
     id_overritten = False
 
+    parent_node = None
+    vertical_position = 0
+
     def __init__(self, data):
         super().__init__()
         self.connections = []
@@ -59,6 +62,7 @@ class Node(BaseWidget):
 
         for child in self.connections:
             child.interlocutor = self
+            child.parent_node = self
 
     def disconnect(self, other):
         if other in self.connections:
@@ -177,6 +181,14 @@ class Node(BaseWidget):
     def hide(self):
         self.is_visible = False
         Renderer.del_widget(self)
+
+    def count_parents(self, count=0):
+        if self.parent_node is not None:
+            count += 1
+            count = self.parent_node.count_parents(count)
+            self.vertical_position = count
+
+        return count
 
 
 EventHandler.register(lambda e: Node(e.data), 'AddNode')
