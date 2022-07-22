@@ -30,7 +30,6 @@ class LoadWindow(BaseWidget):
         self.button_del = DeleteButton(self, top=self.button_new.rect.bottom + 1, right=self.rect.right - 3)
 
         EventHandler.register(self.toggle, 'LoadData')
-        EventHandler.deregister(self.toggle, 'F4ToggleMode')
         EventHandler.register(self.toggle_mode, 'F4ToggleMode')
 
         self.indirect_toggle(True)
@@ -134,10 +133,6 @@ class BaseRowButton(BaseWidget):
         self.image = self.img_uns
 
     def on_mousemotion(self, event):
-        # this hook is necessary
-        pass
-
-    def toggle(self, event):
         # this hook is necessary
         pass
 

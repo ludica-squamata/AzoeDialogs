@@ -45,10 +45,21 @@ class LocutorsPanel(SideBox):
         render = self.fb.render('#' + str(idx) + ': ', 1, COLOR_TEXT, COLOR_BOX)
         r = self.image.blit(render, (4 + idx // 10 * 46, 20 + (idx % 10) * 16))
         name = event.data.get('name')
-        a = LocImage(self, name, Color('0x' + name), r.right + 2, r.y + 2, idx)
+        if 'old_color' in event.data:
+            a_name = event.data['old_color'].name
+        else:
+            a_name = name
+
+        a = LocImage(self, a_name, Color('0x' + name), r.right + 2, r.y + 2, idx)
         if event.data['replace']:
             System.replacing_locutor = False
             a.select()
+
+    def toggle(self, event):
+        if event.data['mode'] == 'dialog':
+            self.show()
+        elif event.data['mode'] == 'behaviour':
+            self.hide()
 
 
 class LocImage(BaseWidget):
@@ -67,8 +78,7 @@ class LocImage(BaseWidget):
         self.spr_name = LocName(self)
         self.rect = self.image.get_rect(topleft=(parent.rect.x + dx, parent.rect.y + dy))
         EventHandler.register(self.toggle_selection, 'select', 'deselect')
-        WidgetHandler.add_widget(self)
-        Renderer.add_widget(self)
+        self.show()
 
     def select(self):
         super().select()
@@ -94,7 +104,7 @@ class LocImage(BaseWidget):
         WidgetHandler.del_widget(self)
         Renderer.del_widget(self)
         super().kill()
-        System.replace_locutor(self.idx)
+        System.replace_locutor(self)
 
     def __repr__(self):
         return 'LocImage #' + str(self.idx)
@@ -115,20 +125,13 @@ class LocName(BaseWidget):
         grandparent = self.parent.parent.rect
         self.f = font.SysFont('Verdana', 14)
         self.rect = r = Rect(grandparent.x, grandparent.bottom + 1, grandparent.w, 21)
-        self.img_uns = render_textrect(self.name, self.f, r, COLOR_TEXT, COLOR_BOX, 1)
-        self.img_sel = render_textrect(self.name, self.f, r, COLOR_SELECTED, COLOR_BOX, 1)
+        w, h = r.size
+        self.img_uns = render_textrect(self.name, self.f, w, h, COLOR_TEXT, COLOR_BOX, 1)
+        self.img_sel = render_textrect(self.name, self.f, w, h, COLOR_SELECTED, COLOR_BOX, 1)
         self.image = self.img_uns
         WidgetHandler.add_widget(self)
         EventHandler.register(self.toggle_selection, 'select', 'deselect')
-        self.t_box = TypeBox(self, r.x, r.bottom, r.w, r.h, 14, self.name)
-
-    def show(self):
-        Renderer.add_widget(self)
-        WidgetHandler.add_widget(self)
-
-    def hide(self):
-        Renderer.del_widget(self)
-        WidgetHandler.del_widget(self)
+        self.t_box = TypeBox(self, r.x, r.bottom, w, h, 14, self.name)
 
     def select(self):
         super().select()
@@ -138,21 +141,22 @@ class LocName(BaseWidget):
         super().deselect()
         self.image = self.img_uns
 
-    def update_text(self, new):
-        nodes = [n for n in WidgetHandler.numerable if n.locutor_name == self.name]
+    def update_text(self, new, external=False):
         self.name = new
+        nodes = [n for n in WidgetHandler.numerable if n.locutor_name == self.name]
         self.t_box.name = new
         self.parent.name = new
         for node in nodes:
-            node.name_locutor(new)
+            node.name_locutor(new, self.parent.color)
 
         r = self.rect
-        self.img_uns = render_textrect(self.name, self.f, r, COLOR_TEXT, COLOR_BOX, 1)
-        self.img_sel = render_textrect(self.name, self.f, r, COLOR_SELECTED, COLOR_BOX, 1)
+        self.img_uns = render_textrect(self.name, self.f, r.w, r.h, COLOR_TEXT, COLOR_BOX, 1)
+        self.img_sel = render_textrect(self.name, self.f, r.w, r.h, COLOR_SELECTED, COLOR_BOX, 1)
         self.image = self.img_uns
 
-        System.toggle_typemode(self.t_box)
-        self.show()
+        if not external:
+            System.toggle_typemode(self.t_box)
+            self.show()
 
     def __repr__(self):
         return 'LocName ' + self.name

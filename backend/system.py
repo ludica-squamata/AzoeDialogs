@@ -84,11 +84,12 @@ class System:
             EventHandler.trigger('NewLocutor', 'System', {'idx': idx, 'name': name, 'replace': False})
 
     @classmethod
-    def replace_locutor(cls, idx):
+    def replace_locutor(cls, old_color):
         name = cls.generate_color()
-        cls.generated_colors[idx] = name
+        cls.generated_colors[old_color.idx] = name
         cls.replacing_locutor = True
-        EventHandler.trigger('NewLocutor', 'System', {'idx': idx, 'name': name, 'replace': True})
+        EventHandler.trigger('NewLocutor', 'System', {'idx': old_color.idx, 'name': name,
+                                                      'replace': True, 'old_color': old_color})
 
     @classmethod
     def modify_data(cls, data):

@@ -1,5 +1,4 @@
 from frontend.globals import WidgetHandler, Renderer
-from backend.eventhandler import EventHandler
 from pygame.sprite import Sprite
 from pygame import K_DELETE
 
@@ -23,7 +22,6 @@ class BaseWidget(Sprite):
             self.layer = self.parent.layer + 1
         else:
             self.layer = 1
-        EventHandler.register(self.toggle, 'F4ToggleMode')
 
     @property
     def center(self):

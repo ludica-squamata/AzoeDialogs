@@ -75,22 +75,28 @@ class WidgetHandler:
             cls.load_dialog_nodes()
         elif evento.data['mode'] == 'behaviour':
             cls.create_loaded_behaviour_nodes()
-            cls.toggle_automatic_connection = True
 
+        cls.toggle_automatic_connection = True
         cls.name_current = evento.data['name']
 
     @classmethod
     def on_file_creation(cls, evento):
         cls.on_window = evento.data['value']
 
-    @classmethod
-    def add_conections(cls):
+    @staticmethod
+    def order_nodes(nodes):
         ordered_nodes = []
-        unordererd_idexes = [int(i.idx) for i in cls.behaviour_nodes]
-        for i in range(len(cls.behaviour_nodes)):
+        unordererd_idexes = [int(i.idx) for i in nodes]
+        for i in range(len(nodes)):
             if i in unordererd_idexes:
                 idx = unordererd_idexes.index(i)
-                ordered_nodes.append(cls.behaviour_nodes[idx])
+                ordered_nodes.append(nodes[idx])
+
+        return ordered_nodes
+
+    @classmethod
+    def add_conections(cls):
+        ordered_nodes = cls.order_nodes(cls.behaviour_nodes)
         for node in reversed(ordered_nodes):
             node_data = System.data['body'][str(node)]
             if 'child' in node_data:
@@ -104,7 +110,10 @@ class WidgetHandler:
                     node.connect(child_node)
 
         cls.toggle_automatic_connection = False
+        cls.sort_nodes(ordered_nodes)
 
+    @classmethod
+    def sort_nodes(cls, ordered_nodes):
         members = {}
         for node in ordered_nodes:
             count = node.count_parents()
@@ -112,12 +121,12 @@ class WidgetHandler:
                 members[count] = []
             members[count].append(node)
             dy = node.vertical_position
-            node.rect.centery = dy*32 + cls.active_area.y
+            node.rect.centery = dy * 32 + cls.active_area.y
 
         for count in members:
             mms = members[count]
             for i, node in enumerate(mms):
-                node.rect.centerx += i*32
+                node.rect.centerx += i * 32
 
         cls.on_window = False
 
@@ -140,9 +149,47 @@ class WidgetHandler:
 
     @classmethod
     def load_dialog_nodes(cls):
-        diff = len(cls.numerable) - System.lenght
-        for i in range(diff):
-            cls.numerable[-1].kill()
+        x = cls.active_area.centerx
+        y = cls.active_area.y
+        locutors = System.data['head']['locutors']
+        for _ in locutors:
+            System.new_locutor()
+
+        for idx in sorted(System.data['body']):
+            node_data = System.data['body'][idx]
+
+            color = Color(0, 0, 0)
+
+            EventHandler.trigger('AddNode', cls.name, {'idx': idx, 'pos': [x, y], 'color': color, 'data': node_data})
+
+    @classmethod
+    def link_dialog_nodes(cls):
+        ordered_nodes = cls.order_nodes(cls.dialog_nodes)
+        for node in ordered_nodes:
+            node_data = System.data['body'][str(node)]
+            if 'leads' in node_data:
+                if type(node_data['leads']) is int:
+                    child_node = ordered_nodes[node_data['leads']]
+                    node.connect(child_node)
+
+                elif type(node_data['leads']) is list:
+                    children = [n for n in ordered_nodes if int(n.idx) in node_data['leads']]
+                    children.sort(key=lambda c: int(c.idx))
+                    for child_node in children:
+                        node.connect(child_node)
+
+        cls.toggle_automatic_connection = False
+        cls.sort_nodes(ordered_nodes)
+        cls.name_loaded_locutors()
+
+    @classmethod
+    def name_loaded_locutors(cls):
+        widgets = [w for w in cls.wids() if w.order == 'a']
+        locs = System.data['head']['locutors']
+        for i in range(len(locs)):
+            chosen = widgets.pop()
+            chosen.spr_name.update_text(locs[i], external=True)
+            chosen.deselect()
 
     @classmethod
     def update(cls):
@@ -153,7 +200,10 @@ class WidgetHandler:
         cls.selected.add([i for i in cls.widgets.widgets() if i.is_selected and (i not in cls.selected)])
 
         if cls.toggle_automatic_connection:
-            cls.add_conections()
+            if System.program_mode == 'dialog':
+                cls.link_dialog_nodes()
+            elif System.program_mode == 'behaviour':
+                cls.add_conections()
 
         for e in events:
             mods = key.get_mods()
@@ -218,7 +268,7 @@ class WidgetHandler:
                     if System.program_mode == 'dialog':
                         System.toggle_input_mode()
 
-                elif e.key == K_s and (System.get_lenght() > 0 or System.limit_input is False):
+                elif e.key == K_s:
                     x, y = mouse.get_pos()
                     color = None
                     identifier = None
@@ -276,26 +326,26 @@ class WidgetHandler:
                         if widget is not cls.selection:
                             widget.on_mousebuttondown(e)
 
-                elif e.button != 1:
-                    widgets = [w for w in cls.widgets.widgets() if w.numerable]
-                    if ctrl and not shift:
-                        dx, dy = 1, 0
-                    elif shift and not ctrl:
-                        dx, dy = 0, 5
-                    elif ctrl and shift:
-                        dx, dy = 5, 0
-                    else:
-                        dx, dy = 0, 1
-
-                    for widget in widgets:
-                        if e.button == 4:
-                            dx *= -1
-                            dy *= -1
-                        elif e.button == 5:
-                            dx *= 1
-                            dy *= 1
-
-                        widget.rect.move_ip(dx, dy)
+                # elif e.button != 1:
+                #     widgets = [w for w in cls.widgets.widgets() if w.numerable]
+                #     if ctrl and not shift:
+                #         dx, dy = 1, 0
+                #     elif shift and not ctrl:
+                #         dx, dy = 0, 5
+                #     elif ctrl and shift:
+                #         dx, dy = 5, 0
+                #     else:
+                #         dx, dy = 0, 1
+                #
+                #     for widget in widgets:
+                #         if e.button == 4:
+                #             dx *= -1
+                #             dy *= -1
+                #         elif e.button == 5:
+                #             dx *= 1
+                #             dy *= 1
+                #
+                #         widget.rect.move_ip(dx, dy)
 
             elif e.type == MOUSEBUTTONUP:  # pos, button
                 if cls.on_selection and e.button == 1:

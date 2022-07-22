@@ -45,4 +45,4 @@ class Counter(BaseWidget):
         self.rect = self.image.get_rect()
 
 
-EventHandler.register(lambda e: Counter(), 'Init')
+# EventHandler.register(lambda e: Counter(), 'Init')

@@ -1,5 +1,5 @@
 from frontend.globals import WidgetHandler, Renderer, COLOR_UNSELECTED, COLOR_SELECTED, NODOS_DIALOGO, NODOS_BEHAVIOUR
-from pygame import Surface, font, transform, draw
+from pygame import Surface, font, transform, draw, Color
 from backend.eventhandler import EventHandler
 from .connection import toggle_connection
 from .basewidget import BaseWidget
@@ -34,20 +34,26 @@ class Node(BaseWidget):
         self.connections = []
         self.fuente = font.SysFont('Verdana', 10)
         self.group = System.widget_group_key
-        self.tipo = data['text'] if data['text'] is not None else 'leaf'
+        self.tipo = data['text'] if data.get('text', None) is not None else 'leaf'
         WidgetHandler.add_widget(self, layer=System.widget_group_key)
         Renderer.add_widget(self, layer=System.widget_group_key)
         self.image = self.create()
         if data['color'] is not None:
             self.colorize(data['color'])
-            self.text = data['text']
+            self.text = data['data']['txt']
+
         if 'idx' in data:
             self.idx = data['idx']
             self.id_overritten = True
             self.real_idx = data['idx']
 
+        if 'from' in data['data']:
+            self.locutor_name = (data['data']['from'])
+            self.named = True
+
         self.rect = self.image.get_rect(center=data['pos'])
         EventHandler.register(self.toggle_selection, 'select', 'deselect')
+        EventHandler.register(self.recolorize, 'NewLocutor')
 
     def connect(self, other):
         if other not in self.connections:
@@ -81,8 +87,11 @@ class Node(BaseWidget):
 
     def colorize(self, color_namer):
         a = color_namer.color if hasattr(color_namer, 'color') else color_namer
-        self.locutor_name = color_namer.name if hasattr(color_namer, 'name') else '%02x%02x%02x' % (a.r, a.g, a.b)
-        self.named = True if hasattr(color_namer, 'name') else False
+
+        if not self.named:
+            self.locutor_name = color_namer.name if hasattr(color_namer, 'name') else '%02x%02x%02x' % (a.r, a.g, a.b)
+            self.named = True if hasattr(color_namer, 'name') else False
+
         self.color_base = a
         if (0.2126 * a.r + 0.7152 * a.g + 0.0722 * a.b) < 50:
             color_b = COLOR_SELECTED
@@ -92,7 +101,17 @@ class Node(BaseWidget):
         self.color_box = color_b
         self.image.fill(self.color_base)
 
-    def name_locutor(self, new_name):
+    def recolorize(self, event):
+        old_color = event.data.get('old_color', None)
+        idx = event.data['idx']
+        if old_color is not None:
+            if old_color.color == self.color_base:
+                new_color = System.generated_colors[idx]
+                self.colorize(Color('0x'+new_color))
+
+    def name_locutor(self, new_name, color=None):
+        if color is not None:
+            self.colorize(color)
         self.locutor_name = new_name
         self.named = True
 

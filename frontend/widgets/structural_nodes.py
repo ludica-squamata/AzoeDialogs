@@ -24,6 +24,7 @@ class StructureNodes(SideBox):
 
         n = StandardNode(self, 'Leaf', self.rect.y + 25 + + (len(standard)) * 21, COLOR_BOX)
         self.properties.add(n, layer=1)
+        EventHandler.register(self.toggle, 'F4ToggleMode')
 
     def deselect_all(self):
         for n in self.properties.widgets():
@@ -41,7 +42,7 @@ class StructureNodes(SideBox):
             node.show()
 
     def hide(self):
-        super().show()
+        super().hide()
         for node in self.properties.get_widgets_from_layer(1):
             node.hide()
 
@@ -83,6 +84,3 @@ class StandardNode(BaseWidget):
 
     def __repr__(self):
         return f'Structural Node {self.name}'
-
-    def toggle(self, event):
-        pass

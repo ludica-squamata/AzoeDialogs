@@ -38,11 +38,13 @@ class Renderer:
 
     @classmethod
     def add_widget(cls, widget, layer=0):
-        cls.widgets.add(widget, layer=layer)
+        if widget not in cls.widgets:
+            cls.widgets.add(widget, layer=layer)
 
     @classmethod
     def del_widget(cls, widget):
-        cls.widgets.remove(widget)
+        if widget in cls.widgets:
+            cls.widgets.remove(widget)
 
     @classmethod
     def update(cls):

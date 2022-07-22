@@ -1,6 +1,7 @@
 from frontend.globals.constants import COLOR_BOX, COLOR_TEXT, WIDTH, HEIGHT, NODOS_DIALOGO, NODOS_BEHAVIOUR
+from backend.textrect import render_textrect, TextRectException
 from frontend.globals import WidgetHandler, Renderer
-from backend import System, render_textrect, EventHandler
+from backend import System, EventHandler
 from .basewidget import BaseWidget
 from pygame import font, Surface
 
@@ -42,18 +43,15 @@ class Preview(BaseWidget):
             t = 'Presione F3 para editar el nombre del locutor seleccionado, o SUPR para cambiar su color.'
         elif len(d) == 1:
             t = 'Presione S para crear nodos del tipo seleccionado.'
-        elif len(s) == 1:
-            idx = s[0].idx
-            if s[0].group == NODOS_DIALOGO:
-                if 0 <= idx < len(System.data):
-                    n = System.data[idx]
-                else:
-                    n = ''
 
-                if not s[0].named:
-                    t = '"' + n + '"'
+        if len(s) == 1:
+            if s[0].group == NODOS_DIALOGO:
+                n = s[0].text
+                if s[0].named:
+                    t = s[0].locutor_name + ': "' + n + '"'
                 else:
-                    t = s[0].locutor_name+': "' + n + '"'
+                    t = '"' + n + '"'
+
             elif s[0].group == NODOS_BEHAVIOUR:
                 t = s[0].text
 
@@ -74,7 +72,13 @@ class Preview(BaseWidget):
 
     def update(self):
         text = self.get_selected()
-        r = render_textrect(text, self.f, *self.rect.inflate(-3, -3).size, COLOR_TEXT, COLOR_BOX)
+        h = -3
+        while True:
+            try:
+                r = render_textrect(text, self.f, *self.rect.inflate(-3, h).size, COLOR_TEXT, COLOR_BOX)
+                break
+            except TextRectException:
+                h += 3
         self.image.fill(COLOR_BOX)
         self.image.blit(r, (3, 3))
 
