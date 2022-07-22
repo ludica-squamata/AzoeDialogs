@@ -40,6 +40,11 @@ class Node(BaseWidget):
         self.image = self.create()
         if data['color'] is not None:
             self.colorize(data['color'])
+        if 'text' in data:
+            self.text = data['text']
+        elif 'data' in data and 'text' in data['data']:
+            self.text = data['data']['txt']
+        elif 'data' in data and 'txt' in data['data']:
             self.text = data['data']['txt']
 
         if 'idx' in data:
@@ -47,7 +52,7 @@ class Node(BaseWidget):
             self.id_overritten = True
             self.real_idx = data['idx']
 
-        if 'from' in data['data']:
+        if 'data' in data and 'from' in data['data']:
             self.locutor_name = (data['data']['from'])
             self.named = True
 
@@ -192,14 +197,6 @@ class Node(BaseWidget):
                 self.show()
             else:
                 self.hide()
-
-    def show(self):
-        self.is_visible = True
-        Renderer.add_widget(self, layer=self.group)
-
-    def hide(self):
-        self.is_visible = False
-        Renderer.del_widget(self)
 
     def count_parents(self, count=0):
         if self.parent_node is not None:

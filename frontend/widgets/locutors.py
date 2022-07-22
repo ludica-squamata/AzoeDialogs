@@ -75,6 +75,7 @@ class LocImage(BaseWidget):
         self.idx = idx
         self.color = color
         self.name = name
+        self.color_name = name
         self.spr_name = LocName(self)
         self.rect = self.image.get_rect(topleft=(parent.rect.x + dx, parent.rect.y + dy))
         EventHandler.register(self.toggle_selection, 'select', 'deselect')
@@ -105,6 +106,9 @@ class LocImage(BaseWidget):
         Renderer.del_widget(self)
         super().kill()
         System.replace_locutor(self)
+
+    def on_deletion(self):
+        System.remove_locutor(self.color_name)
 
     def __repr__(self):
         return 'LocImage #' + str(self.idx)

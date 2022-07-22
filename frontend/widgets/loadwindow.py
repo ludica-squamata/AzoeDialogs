@@ -11,7 +11,6 @@ from os.path import join
 
 
 class LoadWindow(BaseWidget):
-    layer = 5000
     mode = 'dialogs'
     is_visible = False
 
@@ -79,18 +78,18 @@ class LoadWindow(BaseWidget):
         self.reload()
         if self.is_visible:
             for row in self.properties.widgets():
-                row.show()
+                row.show(top=True)
 
     def toggle(self, event):
         self.indirect_toggle(event.data['value'])
 
     def indirect_toggle(self, value):
         if value is True:
-            self.show()
+            self.show(top=True)
             for row in self.properties.get_widgets_from_layer(1):
-                row.show()
-            self.button_new.show()
-            self.button_del.show()
+                row.show(top=True)
+            self.button_new.show(top=True)
+            self.button_del.show(top=True)
 
         else:
             self.hide()

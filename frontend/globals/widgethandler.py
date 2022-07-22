@@ -38,16 +38,24 @@ class WidgetHandler:
     @classmethod
     def del_widget(cls, widget):
         cls.widgets.remove(widget)
+        widget.on_deletion()
         if widget.numerable:
             cls.numerable.remove(widget)
-            if System.widget_group_key == 1:
+            if widget.group == 1:
                 System.number_of_dialog_nodes -= 1
                 cls.dialog_nodes.remove(widget)
-            elif System.widget_group_key == 2:
+            elif widget.group == 2:
                 System.number_of_behaviour_nodes -= 1
                 cls.behaviour_nodes.remove(widget)
 
         cls.numerable.sort(key=lambda o: o.idx)
+
+    @classmethod
+    def clear(cls):
+        widgets = [w for w in cls.widgets if w.order in ('a', 'b', 'c')]
+        for widget in widgets:
+            cls.del_widget(widget)
+        cls.numerable.clear()
 
     @classmethod
     def wids(cls):
@@ -71,6 +79,7 @@ class WidgetHandler:
 
     @classmethod
     def trigger_node_creation(cls, evento):
+        cls.clear()
         if evento.data['mode'] == 'dialog':
             cls.load_dialog_nodes()
         elif evento.data['mode'] == 'behaviour':

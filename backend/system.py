@@ -92,6 +92,11 @@ class System:
                                                       'replace': True, 'old_color': old_color})
 
     @classmethod
+    def remove_locutor(cls, color):
+        cls.generated_colors.remove(color)
+        cls.replacing_locutor = False
+
+    @classmethod
     def modify_data(cls, data):
         idx = data['idx']
         text = data['text']

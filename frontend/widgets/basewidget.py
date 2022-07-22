@@ -69,12 +69,17 @@ class BaseWidget(Sprite):
         elif event.data['mode'] == 'behaviour':
             self.hide()
 
-    def show(self):
+    def show(self, top=False):
         self.is_visible = True
         WidgetHandler.add_widget(self)
         Renderer.add_widget(self)
+        if top is True:
+            Renderer.widgets.move_to_front(self)
 
     def hide(self):
         self.is_visible = False
         WidgetHandler.del_widget(self)
+        Renderer.del_widget(self)
+
+    def on_deletion(self):
         Renderer.del_widget(self)
