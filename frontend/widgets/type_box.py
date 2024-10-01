@@ -1,6 +1,7 @@
 from frontend.globals import WidgetHandler, Renderer, COLOR_BOX, COLOR_TEXT, WIDTH, HEIGHT
 from pygame import K_0, K_1, K_2, K_3, K_4, K_5, K_6, K_7, K_8, K_9, KMOD_SHIFT, KMOD_CAPS
 from pygame import K_UP, K_DOWN, K_RIGHT, K_LEFT, K_RETURN, K_KP_ENTER, K_END, K_HOME
+from frontend.globals import NODOS_DIALOGO, NODOS_BEHAVIOUR
 from pygame import Surface, key, font, draw, Rect
 from backend import EventHandler, System
 from .basewidget import BaseWidget
@@ -61,9 +62,15 @@ class TypeBox(BaseWidget):
                 self.cursor.switch(False)
 
     def return_text(self):
-        if self.get_selected_obj().group == 1:
-            s = [o for o in WidgetHandler.selected.sprites() if o.numerable]
+        s = []
+        if System.widget_group_key == NODOS_DIALOGO:
+            a = [o for o in WidgetHandler.selected.sprites() if o.order == 'a']
+            b = [o for o in WidgetHandler.selected.sprites() if o.order == 'b']
             what_to_do = 'WriteNode'
+            if len(a):
+                s = a
+            elif len(b):
+                s = b
         else:
             s = [o for o in WidgetHandler.behaviour_nodes]
             what_to_do = None
@@ -190,9 +197,9 @@ class TypeBox(BaseWidget):
             self.cursor.place(self.char_x - 1, self.char_y)
 
         elif tecla == K_END:
-            self.cursor_pos = len(self.lines[self.current_line]) - 1
+            self.cursor_pos = len(self.lines[self.current_line])
             self.cursor_at_left = False
-            char = self.lines[self.current_line][self.cursor_pos]
+            char = self.lines[self.current_line][self.cursor_pos - 1]
             if self.cursor_at_left:
                 self.char_x = char.rect.left
             else:
@@ -325,7 +332,11 @@ class TypeBox(BaseWidget):
         char = None
         if movement == 'backward' and self.cursor_pos - 1 >= 0:
             char = self.lines[self.current_line][self.cursor_pos - 1]
-            self.cursor_pos -= 1
+
+        elif movement == 'backward' and self.current_line > 0:
+            self.current_line -= 1
+            self.cursor_pos = len(self.lines[self.current_line])
+            self.del_character(movement)
 
         elif movement == 'forward' and self.cursor_pos + 1 <= self.line_lenght:
             if self.cursor_at_left:
@@ -334,13 +345,18 @@ class TypeBox(BaseWidget):
                 char = self.lines[self.current_line][self.cursor_pos + 1]
                 self.cursor_pos += 1
 
+        elif movement == 'forward' and self.current_line + 1 < len(self.lines):
+            self.current_line += 1
+            for ch in self.lines[self.current_line][self.cursor_pos:]:
+                ch.rect.y -= 18
+
         if char is not None:
             char.remove()
             self.lines[self.current_line].remove(char)
 
             if movement == 'backward':
                 self.char_x -= char.w
-                if self.char_x < 0:
+                if self.char_x <= 0:
                     self.char_y = char.y
                     self.char_x = char.x
 
@@ -348,6 +364,9 @@ class TypeBox(BaseWidget):
 
             for ch in self.lines[self.current_line][self.cursor_pos:]:
                 ch.rect.x -= 10
+
+            if movement == 'backward':
+                self.cursor_pos -= 1
 
     @property
     def line_lenght(self):
@@ -370,9 +389,9 @@ class TypeBox(BaseWidget):
         text = ''
         if len(s) > 0 and hasattr(s[0], 'idx'):
             idx = s[0].idx
-            if s[0].group == 2:
+            if hasattr(s[0], 'group') and s[0].group == NODOS_BEHAVIOUR:
                 text = s[0].text
-            elif 0 <= idx < len(System.data):
+            elif 0 <= idx < len(System.data['body']):
                 text = System.data[idx]
         elif len(s) > 0 and hasattr(s[0], 'name'):
             text = s[0].name
@@ -383,7 +402,7 @@ class TypeBox(BaseWidget):
     def get_selected_obj():
         s = [o for o in WidgetHandler.selected.widgets() if o.editable]
         if len(s) > 0 and hasattr(s[0], 'idx'):
-            if s[0].group == 2:
+            if s[0].group == NODOS_BEHAVIOUR:
                 return s[0]
 
     def update(self):
