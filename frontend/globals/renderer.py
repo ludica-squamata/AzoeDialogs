@@ -22,7 +22,7 @@ class Renderer:
             prefix = 'lib/'
         else:
             prefix = ''
-        display.set_icon(image.load(prefix+'frontend/favicon.png'))
+        display.set_icon(image.load(prefix + 'frontend/favicon.png'))
         display.set_mode((WIDTH, HEIGHT))
 
         f = font.SysFont('Verdana', 14)
@@ -57,8 +57,8 @@ class Renderer:
 
         r = fondo.blit(cls.typemode_label, (505, 360))
         cls.typemode_mark.fill(color)
-        fondo.blit(cls.typemode_mark, (r.right+3, r.y))
-        r2 = cls.mode_label.get_rect(bottom=r.top-2, left=r.left)
+        fondo.blit(cls.typemode_mark, (r.right + 3, r.y))
+        r2 = cls.mode_label.get_rect(bottom=r.top - 2, left=r.left)
         fondo.blit(cls.mode_label, r2)
 
         rect.extend(cls.widgets.draw(fondo))

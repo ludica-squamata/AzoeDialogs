@@ -14,7 +14,7 @@ class Connection(BaseWidget):
         self.handles = [self.parent_a, self.parent_b]
         self.image = self.create()
         self.rect = self.image.get_rect()
-        self.layer = min([self.parent_a.layer, self.parent_b.layer])-1
+        self.layer = min([self.parent_a.layer, self.parent_b.layer]) - 1
         Renderer.add_widget(self)
         WidgetHandler.add_widget(self)
 
@@ -36,7 +36,7 @@ class Connection(BaseWidget):
 
     def add_handle(self, a, b):
         pc = self.create_midpoint(self.handles[a], self.handles[b])
-        p = a+1 if a < b else b+1
+        p = a + 1 if a < b else b + 1
 
         self.handles.insert(p, MidPointHandle(self, pc))
 
@@ -57,7 +57,7 @@ class Connection(BaseWidget):
             self.kill()
 
     def __repr__(self):
-        return 'Connection between '+', '.join(['{}']*len(self.handles)).format(*self.handles)
+        return 'Connection between ' + ', '.join(['{}'] * len(self.handles)).format(*self.handles)
 
 
 class MidPointHandle(BaseWidget):
@@ -94,7 +94,7 @@ class MidPointHandle(BaseWidget):
             self.kill()
 
     def __repr__(self):
-        return 'MidPoint #'+str(self.idx)
+        return 'MidPoint #' + str(self.idx)
 
 
 def toggle_connection(a, b, value=True):

@@ -112,7 +112,7 @@ class Node(BaseWidget):
         if old_color is not None:
             if old_color.color == self.color_base:
                 new_color = System.generated_colors[idx]
-                self.colorize(Color('0x'+new_color))
+                self.colorize(Color('0x' + new_color))
 
     def name_locutor(self, new_name, color=None):
         if color is not None:

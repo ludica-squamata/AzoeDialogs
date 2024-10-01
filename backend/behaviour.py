@@ -40,7 +40,7 @@ class Behaviour:
             if len(node.connections) == 1:  # decorator
                 nodes[str(node)].update({'child': int(node.connections[0])})
             elif len(node.connections) > 1:  # composites
-                nodes[str(node)].update({'children': [int(n) for n in sorted(node.connections, key=lambda n:n.idx)]})
+                nodes[str(node)].update({'children': [int(n) for n in sorted(node.connections, key=lambda n: n.idx)]})
             else:
                 if name is None:
                     nodes[str(node)]['name'] += f' #{str(int(node))}'

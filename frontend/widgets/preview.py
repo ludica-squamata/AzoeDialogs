@@ -46,7 +46,7 @@ class Preview(BaseWidget):
 
         if len(s) == 1:
             if s[0].group == NODOS_DIALOGO:
-                n = s[0].text
+                n = str(s[0].text)
                 if s[0].named:
                     t = s[0].locutor_name + ': "' + n + '"'
                 else:

@@ -1,6 +1,6 @@
 from frontend.globals import COLOR_TEXT, COLOR_BG
 from .basewidget import BaseWidget
-from backend import System, EventHandler
+from backend import System
 from pygame import font
 
 
@@ -19,13 +19,13 @@ class Counter(BaseWidget):
             cant = System.get_lenght()
             extra = System.get_extra()
             if cant > 1:
-                t = 'Quedan '+str(cant)+' nodos disponibles'
+                t = 'Quedan ' + str(cant) + ' nodos disponibles'
             elif cant == 1:
                 t = 'Queda ' + str(cant) + ' nodo disponible'
             else:
                 t = 'No quedan más nodos'
                 if extra > 1:
-                    t += ' ('+str(extra)+' adicionales)'
+                    t += ' (' + str(extra) + ' adicionales)'
                 elif extra != 0:
                     t += ' (1 adicional)'
 
@@ -43,6 +43,3 @@ class Counter(BaseWidget):
     def update(self):
         self.image = self.f.render(self.get_text(), 1, COLOR_TEXT, COLOR_BG)
         self.rect = self.image.get_rect()
-
-
-# EventHandler.register(lambda e: Counter(), 'Init')

@@ -15,6 +15,8 @@ class BaseWidget(Sprite):
 
     is_visible = True
 
+    image = None
+
     def __init__(self, parent=None):
         self.parent = parent
         super().__init__()

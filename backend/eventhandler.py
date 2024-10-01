@@ -1,4 +1,4 @@
-from collections import deque
+﻿from collections import deque
 
 
 class EventHandler:
@@ -12,7 +12,8 @@ class EventHandler:
     def register(cls, listener, *events):
         """
         Este método es llamado por los objetos que desean recibir un evento particular
-        :param listener:es la referencia a una funcion. la misma debe aceptar como parametro un objeto de tipo AzoeEvent
+        :param listener:es la referencia a una funcion. la misma debe aceptar como parametro un
+                        objeto de tipo AzoeEvent.
         :param events:lista de string con los eventos que desean registrarse.
         :return:None
         """
@@ -23,6 +24,13 @@ class EventHandler:
                 cls._oyentes[event].append(listener)
 
     @classmethod
+    def register_many(cls, *pairs):
+        for pair in pairs:
+            listener = pair[0]
+            events = pair[1:]
+            cls.register(listener, *events)
+
+    @classmethod
     def deregister(cls, listener, *events):
         """
         Se llama para removerse de la cola de notificaciones (por ejemplo, al morir un mob).
@@ -30,7 +38,6 @@ class EventHandler:
         :param listener:la funcion que desea borrarse
         :param events:lista de string con los eventos que desean borrarse
         :type listener:(AzoeEvent)->None
-        :type events:tuple
         :return:None
         """
         for event in events:
@@ -50,20 +57,22 @@ class EventHandler:
         :return:None
         """
 
-        event = AzoeEvent(*event_data)
-        cls._cola.append(event)
+        if event_data[0] in cls._oyentes:
+            event = AzoeEvent(*event_data)
+            cls._cola.append(event)
 
     @classmethod
     def process(cls):
         """
         El método llamado antes del update del renderer para hacer dispatching
-        del frame. Para performande puede estar limitado a ejecutar una cantidad de
-        dispatchs por frame, usando yield o algo asi
+        del frame. Para performance solo dispara los eventos generados en este frame.
+        Subsiguientes eventos se processan en subsiguientes frames.
         :return:None
         """
-        _cola = cls._cola
+        _cola = cls._cola.copy()
         while len(_cola) > 0:
             evento = _cola.popleft()
+            cls._cola.remove(evento)
             if evento in cls._oyentes:
                 for listener in cls._oyentes[evento]:
                     listener()
