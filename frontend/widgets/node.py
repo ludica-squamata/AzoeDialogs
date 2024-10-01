@@ -1,5 +1,5 @@
 from frontend.globals import WidgetHandler, Renderer, COLOR_UNSELECTED, COLOR_SELECTED, NODOS_DIALOGO, NODOS_BEHAVIOUR
-from pygame import Surface, font, transform, draw, Color
+from pygame import Surface, font, transform, draw, Color, SRCALPHA
 from backend.eventhandler import EventHandler
 from .connection import toggle_connection
 from .basewidget import BaseWidget
@@ -37,7 +37,9 @@ class Node(BaseWidget):
         self.tipo = data['text'] if data.get('text', None) is not None else 'leaf'
         WidgetHandler.add_widget(self, layer=System.widget_group_key)
         Renderer.add_widget(self, layer=System.widget_group_key)
-        self.image = self.create()
+        self.img_sel = self.create(True)
+        self.img_uns = self.create(False)
+        self.image = self.img_uns
         if data['color'] is not None:
             self.colorize(data['color'])
         if 'text' in data:
@@ -120,26 +122,52 @@ class Node(BaseWidget):
         self.locutor_name = new_name
         self.named = True
 
-    def create(self):
-        return Surface((self.size, self.size))
+    def create(self, selected=False):
+        self.idx = self.get_idx()
+        size = self.size
+        image = Surface((size, size), SRCALPHA)
+        image.fill(self.color_base)
+        image = transform.rotate(image, 45)
+        rect = image.get_rect()
+        render_uns = self.fuente.render(str(self.idx), 1, self.color_font, self.color_base)
+        render_uns_rect = render_uns.get_rect(center=rect.center)
+        image.blit(render_uns, render_uns_rect)
+
+        r = image.get_rect()
+        left = r.midleft
+        right = r.midright
+        top = r.midtop
+        bottom = r.midbottom
+
+        if selected is True:
+            draw.polygon(image, self.color_font, [right, bottom, left, top], 3)
+
+        return image
 
     @property
     def size(self):
         len_idx = len(str(self.get_idx()))
-        size = self.tamanio
+        if len_idx == 1:
+            return 16
         if len_idx == 2:
-            size = 20
+            return 17
         elif len_idx == 3:
-            size = 25
-        return size
+            return 22
+        else:
+            raise ValueError("Do you really need more that 999 nodes?")
 
     def update(self, *args):
-        self.idx = self.get_idx()
-        render_uns = self.fuente.render(str(self.idx), 1, self.color_font, self.color_base)
-        size = self.size if self.tamanio < self.size else self.tamanio
-        self.image = transform.scale(self.image, (size, size))
+        idx = self.get_idx()
+        if idx != self.idx:
+            self.idx = idx
+            self.img_uns = self.create()
+            self.img_sel = self.create(True)
+            if self.is_selected:
+                self.image = self.img_sel
+            else:
+                self.image = self.img_uns
+
         self.rect = self.image.get_rect(center=self.rect.center)
-        self.image.blit(render_uns, render_uns.get_rect(center=self.image.get_rect().center))
 
     def __repr__(self):
         return self.tipo + ' #' + str(self.idx)
@@ -178,12 +206,11 @@ class Node(BaseWidget):
 
     def select(self):
         super().select()
-        r = self.rect.copy()
-        draw.rect(self.image, self.color_box, [0, 0, r.w, r.h], 1)
+        self.image = self.img_sel
 
     def deselect(self):
         super().deselect()
-        self.image.fill(self.color_base)
+        self.image = self.img_uns
 
     def toggle(self, event):
         if event.data['mode'] == 'dialog':

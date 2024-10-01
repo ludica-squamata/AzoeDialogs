@@ -18,6 +18,8 @@ class BaseWidget(Sprite):
     image = None
 
     def __init__(self, parent=None):
+        """Base class for all widgets"""
+
         self.parent = parent
         super().__init__()
         if self.parent is not None:

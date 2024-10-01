@@ -38,7 +38,7 @@ class Connection(BaseWidget):
         pc = self.create_midpoint(self.handles[a], self.handles[b])
         p = a + 1 if a < b else b + 1
 
-        self.handles.insert(p, MidPointHandle(self, pc))
+        self.handles.insert(p, Metadata(self, pc))
 
     def create(self):
         image = Surface((WIDTH, HEIGHT), SRCALPHA)
@@ -102,3 +102,8 @@ def toggle_connection(a, b, value=True):
         Connection(a, b)
     else:
         EventHandler.trigger('DeleteConnection', None, {'value': value, 'parents': [a, b]})
+
+
+class Metadata(MidPointHandle):
+    def __init__(self, parent, center):
+        super().__init__(parent, center)
