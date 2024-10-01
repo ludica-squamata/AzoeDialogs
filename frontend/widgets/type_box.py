@@ -480,6 +480,9 @@ class Space(BaseCharacter):
         Renderer.del_widget(self)
         WidgetHandler.del_widget(self)
 
+    def __str__(self):
+        return self.char
+
     def __repr__(self):
         return 'space'
 

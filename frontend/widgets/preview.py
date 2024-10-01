@@ -46,13 +46,16 @@ class Preview(BaseWidget):
 
         if len(s) == 1:
             if s[0].group == NODOS_DIALOGO:
-                n = str(s[0].text)
+                n = s[0].text
                 if s[0].named:
                     t = s[0].locutor_name + ': "' + n + '"'
-                else:
+                elif n is not None:
                     t = '"' + n + '"'
+                else:
+                    t = 'Presione F3 para comenzar a escribir texto en este nodo.'
 
             elif s[0].group == NODOS_BEHAVIOUR:
+                # muy importante, s[0].text acá es T, no N.
                 t = s[0].text
 
         elif len(s) == 2:
