@@ -29,6 +29,8 @@ class Node(BaseWidget):
     parent_node = None
     vertical_position = 0
 
+    x, y = 0, 0
+
     def __init__(self, data):
         super().__init__()
         self.connections = []
@@ -59,6 +61,7 @@ class Node(BaseWidget):
             self.named = True
 
         self.rect = self.image.get_rect(center=data['pos'])
+        self.x, self.y = self.rect.center
         EventHandler.register(self.toggle_selection, 'select', 'deselect')
         EventHandler.register(self.recolorize, 'NewLocutor')
 
@@ -168,6 +171,7 @@ class Node(BaseWidget):
                 self.image = self.img_uns
 
         self.rect = self.image.get_rect(center=self.rect.center)
+        self.x, self.y = self.rect.center
 
     def __repr__(self):
         return self.tipo + ' #' + str(self.idx)

@@ -231,13 +231,14 @@ class WidgetHandler:
 
                 elif e.key == K_c:
                     if len(widgets) == 2 and all([o.numerable for o in widgets]):
-                        widgets.sort(key=lambda o: o.idx)  # lower idx's go first
+                        widgets.sort(key=lambda o: o.x)  # leftest widget goes first
                         if not shift:
                             widgets[0].connect(widgets[1])
                         else:
                             widgets[0].disconnect(widgets[1])
 
                 elif e.key == K_a and len(widgets) == 2:
+                    widgets.sort(key=lambda o: o.x)  # leftest widget goes first
                     base, other = widgets
                     EventHandler.trigger('AddMidPoint', 'System', {'base': base, 'other': other})
 
