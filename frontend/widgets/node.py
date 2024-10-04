@@ -127,6 +127,8 @@ class Node(BaseWidget):
         self.color_font = color_b
         self.color_box = color_b
 
+        self.recreate()
+
     def recolorize(self, event):
         old_color = event.data.get('old_color', None)
         idx = event.data['idx']
@@ -163,6 +165,14 @@ class Node(BaseWidget):
 
         return image
 
+    def recreate(self):
+        self.img_uns = self.create()
+        self.img_sel = self.create(True)
+        if self.is_selected:
+            self.image = self.img_sel
+        else:
+            self.image = self.img_uns
+
     @property
     def size(self):
         len_idx = len(str(self.get_idx()))
@@ -179,12 +189,7 @@ class Node(BaseWidget):
         idx = self.get_idx()
         if idx != self.idx:
             self.idx = idx
-            self.img_uns = self.create()
-            self.img_sel = self.create(True)
-            if self.is_selected:
-                self.image = self.img_sel
-            else:
-                self.image = self.img_uns
+            self.recreate()
 
         self.rect = self.image.get_rect(center=self.rect.center)
         self.x, self.y = self.rect.center

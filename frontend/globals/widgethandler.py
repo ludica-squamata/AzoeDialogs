@@ -175,7 +175,8 @@ class WidgetHandler:
             node_data = System.data['body'][idx]
             x = 64 * int(idx) % (w / 4) + dx
             y = 64 * int(idx) % w + dy
-            color = Color(0, 0, 0)
+            loc_idx = locutors.index(node_data['from'])
+            color = Color('0x' + System.generated_colors[loc_idx])
 
             EventHandler.trigger('AddNode', cls.name, {'idx': idx, 'pos': [x, y], 'color': color, 'data': node_data})
             EventHandler.process()

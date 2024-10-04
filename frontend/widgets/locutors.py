@@ -50,7 +50,7 @@ class LocutorsPanel(SideBox):
         else:
             a_name = name
 
-        a = LocImage(self, a_name, Color('0x' + name), r.right + 2, r.y + 2, idx)
+        a = LocImage(self, a_name, name, r.right + 2, r.y + 2, idx)
         if event.data['replace']:
             System.replacing_locutor = False
             a.select()
@@ -62,14 +62,14 @@ class LocImage(BaseWidget):
     draggable = False
     order = 'a'
 
-    def __init__(self, parent, name, color, dx, dy, idx):
+    def __init__(self, parent, name, color_name, dx, dy, idx):
         super().__init__(parent)
         self.image = Surface((14, 14))
-        self.image.fill(color)
+        self.color = Color(Color('0x' + color_name))
+        self.image.fill(self.color)
         self.idx = idx
-        self.color = color
         self.name = name
-        self.color_name = name
+        self.color_name = color_name
         self.spr_name = LocName(self)
         self.rect = self.image.get_rect(topleft=(parent.rect.x + dx, parent.rect.y + dy))
         EventHandler.register(self.toggle_selection, 'select', 'deselect')
