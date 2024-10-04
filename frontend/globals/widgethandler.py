@@ -2,6 +2,7 @@ from pygame import event, KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP, MOUSEM
 from pygame import KMOD_CTRL, KMOD_SHIFT, K_RETURN, K_F1, K_s, K_d, K_c, K_a, K_F2, K_F3, K_F4, K_F5, Rect, Color
 from backend import salir, EventHandler, System, Selected
 from backend.group import WidgetGroup
+from .renderer import Renderer
 
 
 class WidgetHandler:
@@ -16,8 +17,6 @@ class WidgetHandler:
 
     dialog_nodes = []
     behaviour_nodes = []
-
-    toggle_automatic_connection = False
 
     on_window = False
 
@@ -85,7 +84,6 @@ class WidgetHandler:
         elif evento.data['mode'] == 'behaviour':
             cls.create_loaded_behaviour_nodes()
 
-        cls.toggle_automatic_connection = True
         cls.name_current = evento.data['name']
 
     @classmethod
@@ -118,7 +116,6 @@ class WidgetHandler:
                 for child_node in children:
                     node.connect(child_node)
 
-        cls.toggle_automatic_connection = False
         cls.sort_nodes(ordered_nodes)
 
     @classmethod
@@ -137,15 +134,21 @@ class WidgetHandler:
             for i, node in enumerate(mms):
                 node.rect.centerx += i * 32
 
-        cls.on_window = False
+        cls.widgets.update()
+        Renderer.update()
+
+        # cls.on_window = False
 
     @classmethod
     def create_loaded_behaviour_nodes(cls):
         structural_nodes = [n for n in cls.wids() if n.order == 'd']
         structural_names = [n.name for n in structural_nodes]
-        x = cls.active_area.centerx
-        y = cls.active_area.y
+        w, h = cls.active_area.size
+        dx = cls.active_area.centerx
+        dy = cls.active_area.y
         for idx in sorted(System.data['body']):
+            x = 64 * int(idx) % (w / 4) + dx
+            y = 64 * int(idx) % h + dy
             node_data = System.data['body'][idx]
             text = node_data['name']
             if text in structural_names:
@@ -155,21 +158,29 @@ class WidgetHandler:
                 color = Color(0, 0, 0)
 
             EventHandler.trigger('AddNode', cls.name, {'idx': idx, 'pos': [x, y], 'color': color, 'text': text})
+            EventHandler.process()
+        else:
+            cls.add_conections()
 
     @classmethod
     def load_dialog_nodes(cls):
-        x = cls.active_area.centerx
-        y = cls.active_area.y
         locutors = System.data['head']['locutors']
         for _ in locutors:
             System.new_locutor()
 
+        w, h = cls.active_area.size
+        dx = cls.active_area.centerx // 2
+        dy = cls.active_area.y
         for idx in sorted(System.data['body']):
             node_data = System.data['body'][idx]
-
+            x = 64 * int(idx) % (w / 4) + dx
+            y = 64 * int(idx) % w + dy
             color = Color(0, 0, 0)
 
             EventHandler.trigger('AddNode', cls.name, {'idx': idx, 'pos': [x, y], 'color': color, 'data': node_data})
+            EventHandler.process()
+        else:
+            cls.link_dialog_nodes()
 
     @classmethod
     def link_dialog_nodes(cls):
@@ -187,7 +198,7 @@ class WidgetHandler:
                     for child_node in children:
                         node.connect(child_node)
 
-        cls.toggle_automatic_connection = False
+        cls.on_window = True
         cls.sort_nodes(ordered_nodes)
         cls.name_loaded_locutors()
 
@@ -201,6 +212,18 @@ class WidgetHandler:
             chosen.deselect()
 
     @classmethod
+    def add_midpoints(cls):
+        ordered_nodes = cls.order_nodes(cls.dialog_nodes)
+        for node in ordered_nodes:
+            if node.node_reqs is not None:
+                base = node
+                other = node.parent_node
+                EventHandler.trigger('AddMidPoint', 'System', {'base': base, 'other': other, 'data': node.node_reqs})
+                EventHandler.process()
+
+        cls.on_window = False
+
+    @classmethod
     def update(cls):
         events = event.get([KEYDOWN, KEYUP, MOUSEBUTTONDOWN, MOUSEBUTTONUP, MOUSEMOTION, QUIT])
         event.clear()
@@ -208,11 +231,8 @@ class WidgetHandler:
         # esto es para que se pueda reemplazar un locutor sin tener que reseleccionarlo.
         cls.selected.add([i for i in cls.widgets.widgets() if i.is_selected and (i not in cls.selected)])
 
-        if cls.toggle_automatic_connection:
-            if System.program_mode == 'dialog':
-                cls.link_dialog_nodes()
-            elif System.program_mode == 'behaviour':
-                cls.add_conections()
+        if cls.on_window:  # esta flag es provisoria
+            cls.add_midpoints()
 
         for e in events:
             mods = key.get_mods()
@@ -231,14 +251,14 @@ class WidgetHandler:
 
                 elif e.key == K_c:
                     if len(widgets) == 2 and all([o.numerable for o in widgets]):
-                        widgets.sort(key=lambda o: o.x)  # leftest widget goes first
+                        widgets.sort(key=lambda o: o.idx)  # lowest idx first
                         if not shift:
                             widgets[0].connect(widgets[1])
                         else:
                             widgets[0].disconnect(widgets[1])
 
                 elif e.key == K_a and len(widgets) == 2:
-                    widgets.sort(key=lambda o: o.x)  # leftest widget goes first
+                    widgets.sort(key=lambda o: o.idx)  # lowest idx first
                     base, other = widgets
                     EventHandler.trigger('AddMidPoint', 'System', {'base': base, 'other': other})
 

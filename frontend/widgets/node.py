@@ -31,6 +31,9 @@ class Node(BaseWidget):
 
     x, y = 0, 0
 
+    node_reqs = None
+    node_leads = None
+
     def __init__(self, data):
         super().__init__()
         self.connections = []
@@ -39,11 +42,6 @@ class Node(BaseWidget):
         self.tipo = data['text'] if data.get('text', None) is not None else 'leaf'
         WidgetHandler.add_widget(self, layer=System.widget_group_key)
         Renderer.add_widget(self, layer=System.widget_group_key)
-        self.img_sel = self.create(True)
-        self.img_uns = self.create(False)
-        self.image = self.img_uns
-        if data['color'] is not None:
-            self.colorize(data['color'])
         if 'text' in data:
             self.text = data['text']
         elif 'data' in data and 'text' in data['data']:
@@ -60,15 +58,31 @@ class Node(BaseWidget):
             self.locutor_name = (data['data']['from'])
             self.named = True
 
+        if 'data' in data and 'reqs' in data['data']:
+            self.node_reqs = data['data']['reqs']
+
+        if 'data' in data and 'leads' in data['data']:
+            leads = data['data']['leads']
+            self.node_leads = leads
+
+        self.img_sel = self.create(True)
+        self.img_uns = self.create()
+        self.image = self.img_uns
+        if data['color'] is not None:
+            self.colorize(data['color'])
+            self.img_sel = self.create(True)
+            self.img_uns = self.create()
+            self.image = self.img_uns
         self.rect = self.image.get_rect(center=data['pos'])
         self.x, self.y = self.rect.center
         EventHandler.register(self.toggle_selection, 'select', 'deselect')
         EventHandler.register(self.recolorize, 'NewLocutor')
 
     def connect(self, other):
+        to_conect = None
         if other not in self.connections:
-            toggle_connection(self, other)
             self.connections.append(other)
+            to_conect = other
             self.interlocutor = other
 
         if len(self.connections) > 1:
@@ -79,6 +93,9 @@ class Node(BaseWidget):
         for child in self.connections:
             child.interlocutor = self
             child.parent_node = self
+
+        if to_conect is not None:
+            toggle_connection(self, to_conect)
 
     def disconnect(self, other):
         if other in self.connections:
@@ -109,7 +126,6 @@ class Node(BaseWidget):
             color_b = COLOR_UNSELECTED
         self.color_font = color_b
         self.color_box = color_b
-        self.image.fill(self.color_base)
 
     def recolorize(self, event):
         old_color = event.data.get('old_color', None)
@@ -178,6 +194,9 @@ class Node(BaseWidget):
 
     def __int__(self):
         return self.idx
+
+    def __lt__(self, other):
+        return self.idx < other.idx
 
     def __str__(self):
         return str(self.idx)

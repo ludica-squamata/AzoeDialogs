@@ -1,28 +1,19 @@
-from frontend.globals.constants import WIDTH, HEIGHT, COLOR_BOX, COLOR_TEXT, COLOR_SELECTED
+from frontend.globals.constants import COLOR_BOX, COLOR_TEXT, COLOR_SELECTED
 from backend.util import abrir_json, navigate
 from backend.eventhandler import EventHandler
 from backend.textrect import render_textrect
-from backend.group import WidgetGroup
 from os import listdir, path, remove
+from .base_window import BaseWindow
 from .basewidget import BaseWidget
 from backend.system import System
-from pygame import Surface, font
-from os.path import join
+from pygame import font
 
 
-class LoadWindow(BaseWidget):
+class LoadWindow(BaseWindow):
     mode = 'dialogs'
-    is_visible = False
 
     def __init__(self):
-        super().__init__()
-        self.image = Surface([WIDTH // 2, HEIGHT // 2])
-        self.rect = self.image.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 32))
-        self.image.fill(COLOR_BOX, [1, 1, self.rect.w - 2, self.rect.h - 2])
-        self.font_title = font.SysFont('Verdana', 14, bold=True)
-        self._r = self.render_title()
-
-        self.properties = WidgetGroup()
+        super().__init__(f'Load - {self.mode}')
         self.show_files(self.mode)
 
         self.button_new = NewButton(self, top=self.rect.top + 1, right=self.rect.right - 3)
@@ -33,16 +24,11 @@ class LoadWindow(BaseWidget):
 
         self.indirect_toggle(True)
 
-    def render_title(self):
-        self.image.fill(COLOR_BOX, [1, 1, self.rect.w - 2, self.rect.h - 2])
-        render = self.font_title.render(f'Load - {self.mode}', 1, COLOR_SELECTED, COLOR_BOX)
-        return self.image.blit(render, (1, 1))
-
     def show_files(self, request):
         ruta = navigate(request)
-        files = [file for file in listdir(ruta) if path.isfile(join(ruta, file))]
+        files = [file for file in listdir(ruta) if path.isfile(path.join(ruta, file))]
         for i, file in enumerate(files):
-            filename = join(ruta, file)
+            filename = path.join(ruta, file)
             x = self.rect.x + 2
             y = i * 20 + self.rect.y + self._r.bottom
             row = Row(self, file[:-5].capitalize(), filename, x, y)
@@ -67,7 +53,7 @@ class LoadWindow(BaseWidget):
             row.kill()
 
         self.show_files(self.mode)
-        self.render_title()
+        self.render_title(f'Load - {self.mode}')
 
     def toggle_mode(self, event):
         if event.data['mode'] == 'dialog':

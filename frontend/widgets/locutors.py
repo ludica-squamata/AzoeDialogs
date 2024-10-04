@@ -55,12 +55,6 @@ class LocutorsPanel(SideBox):
             System.replacing_locutor = False
             a.select()
 
-    def toggle(self, event):
-        if event.data['mode'] == 'dialog':
-            self.show()
-        elif event.data['mode'] == 'behaviour':
-            self.hide()
-
 
 class LocImage(BaseWidget):
     numerable = False

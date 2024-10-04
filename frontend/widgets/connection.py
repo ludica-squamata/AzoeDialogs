@@ -2,23 +2,19 @@ from frontend.globals import COLOR_CONNECTION, WidgetHandler, Renderer, COLOR_UN
 from pygame import Surface, SRCALPHA, draw, BLEND_MAX, BLEND_MIN
 from backend.eventhandler import EventHandler
 from .basewidget import BaseWidget
-from bisect import bisect_left
 
 
 class Connection(BaseWidget):
     handles = None
 
-    centers = None
-
     def __init__(self, parent_a, parent_b):
         super().__init__()
         self.parent_a = parent_a
         self.parent_b = parent_b
-        self.handles = [self.parent_a, self.parent_b]
-        self.centers = [self.parent_a.rect.center, self.parent_b.rect.center]
+        self.handles = [parent_a, parent_b]
         self.image = self.create()
         self.rect = self.image.get_rect()
-        self.layer = min([self.parent_a.layer, self.parent_b.layer]) - 1
+        self.layer = min([parent_a.layer, parent_b.layer]) - 1
         Renderer.add_widget(self)
         WidgetHandler.add_widget(self)
 
@@ -28,46 +24,38 @@ class Connection(BaseWidget):
     def event_handle(self, event):
         base = event.data['base']
         other = event.data['other']
+        data = event.data.get('data', None)
         if all([handle in self.handles for handle in [base, other]]):
             base = self.handles.index(event.data['base'])
             other = self.handles.index(event.data['other'])
             if base + 1 == other or other + 1 == base:
-                ra = self.handles[base]
-                rb = self.handles[other]
-                self.add_handle(ra, rb)
+                self.add_handle(base, other, data)
 
-    def add_handle(self, ra, rb):
-        center = (ra.x + rb.x) // 2, (ra.y + rb.y) // 2  # previously callend "pc", this is the center point
-        # relative to both ends.
-        _temp = [h.x for h in self.handles]  # a temporal list of all the exes of each point.
-        p = bisect_left(_temp, center[0])  # bisect_left() places the new index in the correct position
+    @staticmethod
+    def create_midpoint(ra, rb):
+        return (ra[0] + rb[0]) // 2, (ra[1] + rb[1]) // 2
 
-        self.centers.insert(p, center)
-        self.handles.insert(p, Metadata(self, center))
+    def add_handle(self, a, b, data=None):
+        center = self.create_midpoint(self.handles[a], self.handles[b])
+        p = a + 1 if a < b else b + 1
+        midpoint = Metadata(self, center, data)
+
+        self.handles.insert(p, midpoint)
 
     def create(self):
         image = Surface((WIDTH, HEIGHT), SRCALPHA)
-        differences = [abs(self.parent_a.rect.centerx - self.parent_b.rect.centerx),
-                       abs(self.parent_a.rect.centery - self.parent_b.rect.centery)]
-
-        if differences[0] > differences[1]:  # X-differnece, Y-difference; which is the most significant?
-            if self.parent_a.rect.centerx < self.parent_b.rect.centerx:
-                side_a = self.parent_a.rect.midright
-                side_b = self.parent_b.rect.midleft
-            else:
-                side_a = self.parent_a.rect.midleft
-                side_b = self.parent_b.rect.midright
+        if self.parent_b in self.parent_a.connections:  #parent_b is a child of parent_a
+            side_a = self.parent_a.rect.midbottom
+            side_b = self.parent_b.rect.midtop
+        elif self.parent_a in self.parent_b.connections:  # parent_a is a child of parent_b
+            side_a = self.parent_b.rect.midbottom
+            side_b = self.parent_a.rect.midtop
         else:
-            if self.parent_a.rect.centery < self.parent_b.rect.centery:
-                side_a = self.parent_a.rect.midbottom
-                side_b = self.parent_b.rect.midtop
-            else:
-                side_a = self.parent_a.rect.midtop
-                side_b = self.parent_b.rect.midbottom
+            raise TypeError("parents are not related")
 
-        if len(self.centers) > 2:
-            _centers = self.centers[1:-1]  # this use of self.centers excludes both side_a and side_b
-            draw.aalines(image, COLOR_CONNECTION, 0, [side_a, *_centers, side_b])
+        if len(self.handles) > 2:
+            _centers = [side_a, *[h.rect.center for h in self.handles[1:-1]], side_b]
+            draw.aalines(image, COLOR_CONNECTION, 0, _centers)
         else:
             draw.aalines(image, COLOR_CONNECTION, 0, [side_a, side_b])
         return image
@@ -113,16 +101,9 @@ class MidPointHandle(BaseWidget):
         self.image.fill(COLOR_UNSELECTED, special_flags=BLEND_MIN)
         super().deselect()
 
-    def on_mousemotion(self, event):
-        # now the movement is explicit.
-        indice = self.parent.centers.index(self.rect.center)
-        super().on_mousemotion(event)  # here's where the movement happens.
-        self.x, self.y = self.rect.center
-        self.parent.centers[indice] = self.rect.center
-
     @property
     def idx(self):
-        return self.parent.centers.index(self.rect.center)
+        return self.parent.handles.index(self)
 
     def update(self, *args):
         if not self.parent.alive():
@@ -140,5 +121,6 @@ def toggle_connection(a, b, value=True):
 
 
 class Metadata(MidPointHandle):
-    def __init__(self, parent, idx):
-        super().__init__(parent, idx)
+    def __init__(self, parent, center, data):
+        self.data = data
+        super().__init__(parent, center)

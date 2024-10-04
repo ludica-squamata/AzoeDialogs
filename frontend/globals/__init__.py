@@ -1,3 +1,3 @@
 from .constants import *
-from .widgethandler import WidgetHandler
 from .renderer import Renderer
+from .widgethandler import WidgetHandler

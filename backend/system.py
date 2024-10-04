@@ -64,7 +64,7 @@ class System:
     @classmethod
     def load_file_data(cls, data, mode):
         cls.data = data
-        cls.lenght = len(cls.data)
+        cls.lenght = len(cls.data['body'])
         cls.set_program_mode(mode)
         EventHandler.trigger('F4ToggleMode', 'ENGINE', {'mode': cls.program_mode})
 
